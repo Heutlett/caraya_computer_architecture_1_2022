@@ -23,6 +23,18 @@ def convert_img_txt(array):
 
     return result
 
+def convert_txt_img(array):
+
+    result = []
+
+    for r in range(len(array)):
+        row = []
+        for c in range(len(array)):
+            row.append([array[r][c][0],array[r][c][0],array[r][c][0]])
+
+        result.append(row)
+
+    return result
 
 image  = imread("imgs/pikachu.jpg")  
 
@@ -31,4 +43,5 @@ I = image.tolist()
 #print(type(image))
 #printer(I)
 printer(convert_img_txt(I))
+#printer(convert_txt_img(I))
 #print(len(I[0]))
