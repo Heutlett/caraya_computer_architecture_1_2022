@@ -20,12 +20,16 @@ def zeros_array(n):
 
     return a
 
+def calc_horizontal(I,c,c1,c2,abi):
 
-#I = [[10,20],[30,40]]           #   Imagen inicial
+    return round(((c2-abi)/(c2-c1))*I[r][c] + ((abi-c1)/(c2-c1))*I[r][c+1])
+
+
+I = [[10,20],[30,40]]           #   Imagen inicial
 
 #I = [[10,20,50],[30,40,60],[30,40,60]]           #   Imagen inicial
 
-I = [[1,2,3,4],[5,6,7,8],[9,10,11,12],[13,14,15,16]]           #   Imagen inicial
+#I = [[1,2,3,4],[5,6,7,8],[9,10,11,12],[13,14,15,16]]           #   Imagen inicial
 
 I_out = []                      #   Imagen interpolada
 for r in range(len(I)):
@@ -35,9 +39,19 @@ for r in range(len(I)):
         I_new.append(I[r][c])
 
         if(c < len(I[r])-1):
+            
+            c1 = (c) + 1              # indice conocido 1
+            c2 = (c + 3) + 1          # indice conocido 2
+            ai = (c + 1) + 1         # indice de a
+            bi = (c + 2) + 1         # indice de a
 
-            I_new.append(0)
-            I_new.append(0)
+            print("c1: ",c1)
+            print("c2: ",c2)
+            print("ai: ",ai)
+
+            I_new.append(calc_horizontal(I,c,c1,c2,ai))     #a
+
+            I_new.append(calc_horizontal(I,c,c1,c2,bi))     #b
             
     I_out.append(I_new)
 
