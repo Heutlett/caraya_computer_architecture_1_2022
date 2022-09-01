@@ -54,3 +54,40 @@ def convert_img_array_rgb(img_name):
     image  = imread("imgs/"+img_name)  
 
     return image
+
+
+
+I = convert_img_array_rgb("pikachu10.jpg")
+
+I2 = convert_img_txt(I)
+
+I2 = bilinear_interpolation(I2)
+
+I2 = convert_txt_img(I2)
+
+print("Src:")
+#print(I)
+
+contador = 0
+print(len(I),"x",len(I[0]))
+for i in I:
+    #print("row: ",contador)
+    #print(i)
+    #print()
+    contador = contador +1
+
+print()
+print("Out")
+#print(I2)
+
+contador = 0
+print(len(I2),"x",len(I2[0]))
+for i in I2:
+    #print("row: ",contador)
+    #print(i)
+    #print()
+    contador = contador +1
+from matplotlib import pyplot as plt
+
+plt.imshow(I2, interpolation='nearest')
+plt.show()
