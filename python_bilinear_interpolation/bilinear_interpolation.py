@@ -20,7 +20,7 @@ def calc_interpolation(c1,c2,i,vc1,vc2):
 
     result = round(((c2-i)/(c2-c1))*vc1 + ((i-c1)/(c2-c1))*vc2)
 
-    print("num(",i,") = ((",c2,"-",i,")/(",c2,"-",c1,"))*",vc1," + ((",i,"-",c1,")/(",c2,"-",c1,"))*",vc2,"=",result)
+    
 
     return result
 
@@ -53,7 +53,7 @@ def middle_pixels(n,index,I,r,m):
             #print("vc1: ",vc1)
             #print("vc2: ",vc2)
 
-            print("\n> Pixeles verticales (c,g,f,j)\n")
+            
 
             mid.append(calc_interpolation(c1,c2,ind,vc1,vc2)) #c y g
             
@@ -81,7 +81,7 @@ def middle_pixels(n,index,I,r,m):
             #print("vc1: ",vc1)
             #print("vc2: ",vc2)
 
-            print("\n> Pixeles intermedios (d,e,h,i)\n")
+            
             
             mid[i] = calc_interpolation(c1,c2,ind,vc1,vc2)
 
@@ -122,7 +122,7 @@ for r in range(len(I)):
             #print("vc1: ",vc1)
             #print("vc2: ",vc2)
 
-            print("\n> Pixeles horizontales (a,b,k,l)\n")
+            
 
             I_new.append(calc_interpolation(c1,c2,ai,vc1,vc2))      #a
             I_new.append(calc_interpolation(c1,c2,bi,vc1,vc2))      #b
