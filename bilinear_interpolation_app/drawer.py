@@ -5,26 +5,18 @@ from bilinear_interpolation import *
 from img_tools import *
 from matplotlib import pyplot as plt
 
-img = "imagen.jpg"
+# Dibuja una matriz de pixeles en un fondo blanco y lo guarda como una imagen
+def drawImage(imgMatrix):
 
-arrayImgSrc = convert_img_array_rgb(img)
+    image = Image.open("imgs/white1500.jpg") 
 
-#printer(arrayImgSrc)
+    for r in range(len(imgMatrix)):
+        for c in range(len(imgMatrix)):
+            
+            color = imgMatrix[r][c]
+            #print("pintando el color: ", color, " en las cordenadas: ", c,",",r)
+            image.putpixel( (c, r), (color, color, color) )
 
-arrayImgOut = convert_img_txt(arrayImgSrc)
-arrayImgOut = bilinear_interpolation(arrayImgOut)
+    image.save("imgs/result.jpg")
 
-# creating a image object
-image = Image.open("imgs/white1500.jpg") 
-
-  
-for r in range(len(arrayImgOut)):
-    for c in range(len(arrayImgOut)):
-        
-        color = arrayImgOut[r][c]
-        #print("pintando el color: ", color, " en las cordenadas: ", c,",",r)
-        image.putpixel( (c, r), (color, color, color) )
-  
-image.show()
-
-
+    print("Imagen guardada correctamente")
