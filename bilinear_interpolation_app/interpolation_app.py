@@ -1,11 +1,12 @@
 
+from cgitb import enable
 import tkinter as tk
 from tkinter import ttk
 from calendar import month_name
 from tkinter.messagebox import showinfo
 from tkinter import filedialog
 from PIL import Image, ImageTk
-
+import os
 from bilinear_interpolation import *
 from img_tools import *
 from drawer import *
@@ -20,6 +21,9 @@ class Interfaz(ttk.Frame):
     entry_var = tk.StringVar()
     entry_var.set("imagen.jpg")
 
+    entry_Quad = tk.StringVar()
+    entry_Quad.set("0")
+
     # Canvas
     canvasSrc = 0
     canvasQuad = 0
@@ -28,14 +32,17 @@ class Interfaz(ttk.Frame):
     # Variables
 
     imgSrc = ""
+    imgQuad = "imageSrcQuadrants.jpg"
     imgOut = "result.jpg"
+    
 
     imgSrcDimensions = 0
     imgOutDimensions = 0
 
     # Flags
 
-    plot = False
+    loaded = False
+
 
     def __init__(self):
         super().__init__()
@@ -51,9 +58,6 @@ class Interfaz(ttk.Frame):
         # This will create style object
         style = ttk.Style()
         
-        # This will be adding style, and
-        # naming that style variable as
-        # W.Tbutton (TButton is used for ttk.Button).
         style.configure('my.TButton', font =
                     ('Helvetica', 24, 'bold'),
                         foreground = 'black',borderwidth = '4')
@@ -61,15 +65,21 @@ class Interfaz(ttk.Frame):
 
         labelTitulo = tk.Label(self.root_frame, text='Bilinear Interpolation in ARM',font=("Helvetica", 35)).place(x=477, y=34)
         
-        label_entry_img = tk.Label(self.root_frame, text='Type image name:',font=("Helvetica", 20)).place(x=100, y=158)
-        entry_img = ttk.Entry(self.root_frame, textvariable=self.entry_var, font=("Helvetica", 20)).place(x=360, y=154)
+        label_entry_img = tk.Label(self.root_frame, text='Type image name:',font=("Helvetica", 20)).place(x=80, y=158)
+        entry_img = ttk.Entry(self.root_frame, textvariable=self.entry_var, font=("Helvetica", 20)).place(x=320, y=154)
+
+        button_cargarImg = ttk.Button(self.root_frame, text='Load image', style='my.TButton',
+                                    command=self.fun_cargar_img).place(x=720,y=150)
+
         button_iniciar = ttk.Button(self.root_frame, text='Ejecutar interpolación bilinear', style='my.TButton',
-                                          command=self.fun_ejecutar_interpolacion).place(x=1000,y=150)
+                                          command=self.fun_ejecutar_interpolacion).place(x=1120,y=150)
 
         label1 = tk.Label(self.root_frame, text='Source Image',font=("Helvetica", 24)).place(x=250-100, y=260)
         label2 = tk.Label(self.root_frame, text='Select one quadrant',font=("Helvetica", 24)).place(x=850-180, y=260)
         label3 = tk.Label(self.root_frame, text='Interpolated Image',font=("Helvetica", 24)).place(x=850+450, y=260)
 
+        labelQuad = tk.Label(self.root_frame, text='Quadrant:',font=("Helvetica", 20),foreground="red").place(x=710, y=740)
+        label_quad = ttk.Label(self.root_frame, width=5, justify="center", textvariable=self.entry_Quad, font=("Consolas", 30)).place(x=850, y=730)
 
         
         
@@ -85,25 +95,33 @@ class Interfaz(ttk.Frame):
 
     #######################################################################################################################
 
-    
-    def fun_ejecutar_interpolacion(self):
+    def fun_cargar_img(self):
 
-        imgSrc = self.entry_var.get()
-        imgOut = "result.jpg"
+        if (self.entry_var.get() == ""):
 
-        arrayImgSrc = convert_img_array_rgb(imgSrc)
-        arrayImgOut = convert_img_txt(arrayImgSrc)
-        arrayImgOut = bilinear_interpolation(arrayImgOut)
+            tk.messagebox.showinfo(title="Error", message="You must enter the name of the image!")
+            return 
+
+        files = os.listdir('./imgs')
+
+        if (self.entry_var.get() not in files):
+            tk.messagebox.showinfo(title="Error", message="The image you entered does not exist")
+            return 
+
+        self.imgSrc = self.entry_var.get()
+        imgSrcQuadrants = "imageSrcQuadrants.jpg"
+
+        arrayImgSrc = convert_img_array_rgb(self.imgSrc)
+        arraySrcQuadrants = convert_img_txt(arrayImgSrc)
 
         self.imgSrcDimensions = len(arrayImgSrc)
-        self.imgOutDimensions = len(arrayImgOut)-1
 
-        drawImage(arrayImgOut)
+        drawQuadrants(arraySrcQuadrants)
 
-        arrayImgOut = convert_img_array_rgb(imgOut)
+        arrayImgQuadrants = convert_img_array_rgb(imgSrcQuadrants)
 
         self.imgSrc = ImageTk.PhotoImage(image=Image.fromarray(arrayImgSrc))
-        self.imgOut = ImageTk.PhotoImage(image=Image.fromarray(arrayImgOut))
+        self.imgQuad = ImageTk.PhotoImage(image=Image.fromarray(arrayImgQuadrants))
 
         self.canvasSrc = tk.Canvas(self.root_frame,width=self.imgSrcDimensions,height=self.imgSrcDimensions)
         self.canvasSrc.place(x=180-100,y=308)
@@ -111,13 +129,42 @@ class Interfaz(ttk.Frame):
 
         self.canvasQuad = tk.Canvas(self.root_frame,width=self.imgSrcDimensions,height=self.imgSrcDimensions)
         self.canvasQuad.place(x=770-140,y=308)
-        self.canvasQuad.create_image(0,0, anchor="nw", image=self.imgSrc)
+        self.canvasQuad.create_image(0,0, anchor="nw", image=self.imgQuad)
 
-        self.canvasOut = tk.Canvas(self.root_frame,width=self.imgSrcDimensions,height=self.imgSrcDimensions)
-        self.canvasOut.place(x=770+450,y=308)
-        self.canvasOut.create_image(0,0, anchor="nw", image=self.imgOut)
+        self.loaded = True
 
-        self.plot = True
+
+    def fun_ejecutar_interpolacion(self):
+        
+        if(self.entry_var.get() != "" and self.loaded):
+
+            imgSrc = self.entry_var.get()
+            imgOut = "result.jpg"
+
+            arrayImgSrc = convert_img_array_rgb(imgSrc)
+            arrayImgOut = convert_img_txt(arrayImgSrc)
+            arrayImgOut = bilinear_interpolation(arrayImgOut)
+
+            self.imgSrcDimensions = len(arrayImgSrc)
+            self.imgOutDimensions = len(arrayImgOut)-1
+
+            drawImage(arrayImgOut)
+
+            arrayImgOut = convert_img_array_rgb(imgOut)
+
+            self.imgOut = ImageTk.PhotoImage(image=Image.fromarray(arrayImgOut))
+
+            self.canvasOut = tk.Canvas(self.root_frame,width=self.imgSrcDimensions,height=self.imgSrcDimensions)
+            self.canvasOut.place(x=770+450,y=308)
+            self.canvasOut.create_image(0,0, anchor="nw", image=self.imgOut)
+
+            tk.messagebox.showinfo(title="Success", message="The interpolated image has been generated successfully!")
+
+        elif(self.entry_var.get() == ""):
+            tk.messagebox.showinfo(title="Error", message="You must enter the name of the image!")
+        else:
+
+            tk.messagebox.showinfo(title="Error", message="You must first upload an image!")
 
 
 if __name__ == "__main__":
