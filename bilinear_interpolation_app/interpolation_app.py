@@ -35,6 +35,7 @@ class Interfaz(ttk.Frame):
     imgQuad = "imageSrcQuadrants.jpg"
     imgOut = "result.jpg"
     arrayImgSrc = []
+    arraySrcQuadrants = []
     
 
     imgSrcDimensions = 390
@@ -86,12 +87,6 @@ class Interfaz(ttk.Frame):
         
         # Evento que captura la posicion de un click 
 
-        def motion(event):
-            x, y = event.x, event.y
-            print('{}, {}'.format(x, y))
-
-        self.root_frame.bind('<Button-1>', motion)
-
         self.root_frame.mainloop()
 
     #######################################################################################################################
@@ -113,26 +108,91 @@ class Interfaz(ttk.Frame):
         imgSrcQuadrants = "imageSrcQuadrants.jpg"
 
         self.arrayImgSrc = convert_img_array_rgb(self.imgSrc)
-        arraySrcQuadrants = convert_img_txt(self.arrayImgSrc)
+        self.arraySrcQuadrants = convert_img_txt(self.arrayImgSrc)
 
-        self.imgSrcDimensions = len(self.arrayImgSrc)
+        drawQuadrants(self.arraySrcQuadrants)
 
-        drawQuadrants(arraySrcQuadrants)
-
-        arrayImgQuadrants = convert_img_array_rgb(imgSrcQuadrants)
+        self.arrayImgQuadrants = convert_img_array_rgb(imgSrcQuadrants)
 
         self.imgSrc = ImageTk.PhotoImage(image=Image.fromarray(self.arrayImgSrc))
-        self.imgQuad = ImageTk.PhotoImage(image=Image.fromarray(arrayImgQuadrants))
+        self.imgQuad = ImageTk.PhotoImage(image=Image.fromarray(self.arrayImgQuadrants))
 
         self.canvasSrc = tk.Canvas(self.root_frame,width=self.imgSrcDimensions,height=self.imgSrcDimensions)
         self.canvasSrc.place(x=180-100,y=308)
         self.canvasSrc.create_image(0,0, anchor="nw", image=self.imgSrc)
 
+
+
+        self.loaded = True
+
         self.canvasQuad = tk.Canvas(self.root_frame,width=self.imgSrcDimensions,height=self.imgSrcDimensions)
         self.canvasQuad.place(x=770-140,y=308)
         self.canvasQuad.create_image(0,0, anchor="nw", image=self.imgQuad)
+        self.canvasQuad.bind("<Button-1>", self.motion)
 
-        self.loaded = True
+    def motion(self,event):
+            x, y = event.x, event.y
+            
+            quad = 0
+
+            if (x < 97 and x > 0):
+                if (y < 97):
+                    quad = 0
+                elif (y> 98 and y < 194):
+                    quad = 5
+                elif (y> 195 and y < 292):
+                    quad = 9
+                elif (y> 293 and y < 389):
+                    quad = 13
+
+            if (x < 194 and x > 98):
+                if (y < 97):
+                    quad = 2
+                elif (y> 98 and y < 194):
+                    quad = 6
+                elif (y> 195 and y < 292):
+                    quad = 10
+                elif (y> 293 and y < 389):
+                    quad = 14
+
+            if (x < 292 and x > 195):
+                if (y < 97):
+                    quad = 3
+                elif (y> 98 and y < 194):
+                    quad = 7
+                elif (y> 195 and y < 292):
+                    quad = 11
+                elif (y> 293 and y < 389):
+                    quad = 15
+
+            if (x < 389 and x > 293):
+                if (y < 97):
+                    quad = 4
+                elif (y> 98 and y < 194):
+                    quad = 8
+                elif (y> 195 and y < 292):
+                    quad = 12
+                elif (y> 293 and y < 389):
+                    quad = 16
+
+            self.entry_Quad.set(quad)
+
+            imgSrcQuadrants = "imageSrcQuadrants.jpg"
+
+            paintQuadrant(self.arraySrcQuadrants,x,y,quad)
+
+            self.arrayImgQuadrants = convert_img_array_rgb(imgSrcQuadrants)
+
+            self.imgQuad = ImageTk.PhotoImage(image=Image.fromarray(self.arrayImgQuadrants))
+
+            self.canvasQuad = tk.Canvas(self.root_frame,width=self.imgSrcDimensions,height=self.imgSrcDimensions)
+            self.canvasQuad.place(x=770-140,y=308)
+            self.canvasQuad.create_image(0,0, anchor="nw", image=self.imgQuad)
+            self.canvasQuad.bind("<Button-1>", self.motion)
+
+
+
+
 
 
     def fun_ejecutar_interpolacion(self):
