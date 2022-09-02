@@ -34,10 +34,11 @@ class Interfaz(ttk.Frame):
     imgSrc = ""
     imgQuad = "imageSrcQuadrants.jpg"
     imgOut = "result.jpg"
+    arrayImgSrc = []
     
 
-    imgSrcDimensions = 0
-    imgOutDimensions = 0
+    imgSrcDimensions = 390
+    imgOutDimensions = 390
 
     # Flags
 
@@ -111,16 +112,16 @@ class Interfaz(ttk.Frame):
         self.imgSrc = self.entry_var.get()
         imgSrcQuadrants = "imageSrcQuadrants.jpg"
 
-        arrayImgSrc = convert_img_array_rgb(self.imgSrc)
-        arraySrcQuadrants = convert_img_txt(arrayImgSrc)
+        self.arrayImgSrc = convert_img_array_rgb(self.imgSrc)
+        arraySrcQuadrants = convert_img_txt(self.arrayImgSrc)
 
-        self.imgSrcDimensions = len(arrayImgSrc)
+        self.imgSrcDimensions = len(self.arrayImgSrc)
 
         drawQuadrants(arraySrcQuadrants)
 
         arrayImgQuadrants = convert_img_array_rgb(imgSrcQuadrants)
 
-        self.imgSrc = ImageTk.PhotoImage(image=Image.fromarray(arrayImgSrc))
+        self.imgSrc = ImageTk.PhotoImage(image=Image.fromarray(self.arrayImgSrc))
         self.imgQuad = ImageTk.PhotoImage(image=Image.fromarray(arrayImgQuadrants))
 
         self.canvasSrc = tk.Canvas(self.root_frame,width=self.imgSrcDimensions,height=self.imgSrcDimensions)
@@ -138,15 +139,10 @@ class Interfaz(ttk.Frame):
         
         if(self.entry_var.get() != "" and self.loaded):
 
-            imgSrc = self.entry_var.get()
             imgOut = "result.jpg"
 
-            arrayImgSrc = convert_img_array_rgb(imgSrc)
-            arrayImgOut = convert_img_txt(arrayImgSrc)
+            arrayImgOut = convert_img_txt(self.arrayImgSrc)
             arrayImgOut = bilinear_interpolation(arrayImgOut)
-
-            self.imgSrcDimensions = len(arrayImgSrc)
-            self.imgOutDimensions = len(arrayImgOut)-1
 
             drawImage(arrayImgOut)
 
