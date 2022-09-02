@@ -5,6 +5,7 @@ from tkinter import ttk
 from calendar import month_name
 from tkinter.messagebox import showinfo
 from tkinter import filedialog
+from turtle import bgcolor
 from PIL import Image, ImageTk
 import os
 from bilinear_interpolation import *
@@ -34,8 +35,11 @@ class Interfaz(ttk.Frame):
     imgSrc = ""
     imgQuad = "imageSrcQuadrants.jpg"
     imgOut = "result.jpg"
+    imgSelected = ""
+
     arrayImgSrc = []
     arraySrcQuadrants = []
+    arrayImgSelect = []
     
 
     imgSrcDimensions = 390
@@ -44,6 +48,7 @@ class Interfaz(ttk.Frame):
     # Flags
 
     loaded = False
+    quad_selected = False
 
 
     def __init__(self):
@@ -60,9 +65,15 @@ class Interfaz(ttk.Frame):
         # This will create style object
         style = ttk.Style()
         
-        style.configure('my.TButton', font =
+        style.configure('my.TButton',  background = 'yellow',font =
                     ('Helvetica', 24, 'bold'),
                         foreground = 'black',borderwidth = '4')
+        
+        style.configure('my2.TButton',  background = 'green',font =
+            ('Helvetica', 24, 'bold'),
+                foreground = 'black',borderwidth = '4')
+
+       
 
 
         labelTitulo = tk.Label(self.root_frame, text='Bilinear Interpolation in ARM',font=("Helvetica", 35)).place(x=477, y=34)
@@ -73,7 +84,7 @@ class Interfaz(ttk.Frame):
         button_cargarImg = ttk.Button(self.root_frame, text='Load image', style='my.TButton',
                                     command=self.fun_cargar_img).place(x=720,y=150)
 
-        button_iniciar = ttk.Button(self.root_frame, text='Ejecutar interpolación bilinear', style='my.TButton',
+        button_iniciar = ttk.Button(self.root_frame, text='Ejecutar interpolación bilinear', style='my2.TButton',
                                           command=self.fun_ejecutar_interpolacion).place(x=1120,y=150)
 
         label1 = tk.Label(self.root_frame, text='Source Image',font=("Helvetica", 24)).place(x=250-100, y=260)
@@ -176,6 +187,7 @@ class Interfaz(ttk.Frame):
                     quad = 16
 
             self.entry_Quad.set(quad)
+            self.quad_selected = True
 
             imgSrcQuadrants = "imageSrcQuadrants.jpg"
 
@@ -190,19 +202,93 @@ class Interfaz(ttk.Frame):
             self.canvasQuad.create_image(0,0, anchor="nw", image=self.imgQuad)
             self.canvasQuad.bind("<Button-1>", self.motion)
 
+            self.createQuadrantMatrix()
 
 
+    def createQuadrantMatrix(self):
+
+        quad = self.entry_Quad.get()
+
+        array = convert_img_txt(self.arrayImgSrc)
+
+        #print(array)
+
+        result = []
+
+        for r in range(len(array)):
+            row = []
+            for c in range(len(array)):
+                
+                #print(array[r][c])
+
+                if(quad == "0"):
+                    if (r <= 96 and c <= 96 and r <= 96):
+                        row.append(array[r][c])
+                elif(quad == "2"):
+                    if (c <= 193 and c >= 97 and r <= 96):
+                        row.append(array[r][c])
+                elif(quad == "3"):
+                    if (c <= 290 and c >= 194 and r <= 96):
+                        row.append(array[r][c])
+                elif(quad == "4"):
+                    if (c <= 387 and c >= 291 and r <= 96):
+                        row.append(array[r][c])
+                elif(quad == "5"):
+                    if (c <= 96 and r>= 97 and r <= 193):
+                        row.append(array[r][c])
+                elif(quad == "6"):
+                    if (c <= 193 and c >= 97 and r>= 97 and r <= 193):
+                        row.append(array[r][c])
+                elif(quad == "7"):
+                    if (c <= 290 and c >= 194 and r>= 97 and r <= 193):
+                        row.append(array[r][c])
+                elif(quad == "8"):
+                    if (c <= 387 and c >= 291 and r>= 97 and r <= 193):
+                        row.append(array[r][c])    
+                elif(quad == "9"):
+                    if (c <= 96 and r>= 194 and r <= 290):
+                        row.append(array[r][c])
+                elif(quad == "10"):
+                    if (c <= 193 and c >= 97 and r>= 194 and r <= 290):
+                        row.append(array[r][c])
+                elif(quad == "11"):
+                    if (c <= 290 and c >= 194 and r>= 194 and r <= 290):
+                        row.append(array[r][c])
+                elif(quad == "12"):
+                    if (c <= 387 and c >= 291 and r>= 194 and r <= 290):
+                        row.append(array[r][c]) 
+
+                elif(quad == "13"):
+                    if (c <= 96 and r>= 291 and r <= 387):
+                        row.append(array[r][c])
+                elif(quad == "14"):
+                    if (c <= 193 and c >= 97 and r>= 291 and r <= 387):
+                        row.append(array[r][c])
+                elif(quad == "15"):
+                    if (c <= 290 and c >= 194 and r>= 291 and r <= 387):
+                        row.append(array[r][c])
+                elif(quad == "16"):
+                    if (c <= 387 and c >= 291 and r>= 291 and r <= 387):
+                        row.append(array[r][c]) 
+            
+            if(len(row)>0):
+                result.append(row)
+        
+        self.arrayImgSelect = result
 
 
 
     def fun_ejecutar_interpolacion(self):
         
-        if(self.entry_var.get() != "" and self.loaded):
+        if(self.entry_var.get() != "" and self.loaded and self.quad_selected):
 
             imgOut = "result.jpg"
 
-            arrayImgOut = convert_img_txt(self.arrayImgSrc)
-            arrayImgOut = bilinear_interpolation(arrayImgOut)
+            #arrayImgOut = convert_img_txt(self.arrayImgSrc)
+            arrayImgOut = bilinear_interpolation(self.arrayImgSelect)
+            self.imgOutDimensions = len(arrayImgOut)
+
+            print("Size out img: ", self.imgOutDimensions, "x", self.imgOutDimensions)
 
             drawImage(arrayImgOut)
 
@@ -210,14 +296,18 @@ class Interfaz(ttk.Frame):
 
             self.imgOut = ImageTk.PhotoImage(image=Image.fromarray(arrayImgOut))
 
-            self.canvasOut = tk.Canvas(self.root_frame,width=self.imgSrcDimensions,height=self.imgSrcDimensions)
-            self.canvasOut.place(x=770+450,y=308)
+            
+
+            self.canvasOut = tk.Canvas(self.root_frame,width=self.imgOutDimensions,height=self.imgOutDimensions)
+            self.canvasOut.place(x=780+500,y=358)
             self.canvasOut.create_image(0,0, anchor="nw", image=self.imgOut)
 
             tk.messagebox.showinfo(title="Success", message="The interpolated image has been generated successfully!")
 
         elif(self.entry_var.get() == ""):
             tk.messagebox.showinfo(title="Error", message="You must enter the name of the image!")
+        elif(self.quad_selected == False):
+            tk.messagebox.showinfo(title="Error", message="You must select one quadrant in the image!")
         else:
 
             tk.messagebox.showinfo(title="Error", message="You must first upload an image!")
