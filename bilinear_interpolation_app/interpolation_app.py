@@ -15,25 +15,33 @@ root.resizable(False, False)
 
 arrayImgSrc = convert_img_array_rgb("pikachu.jpg")
 
+print(arrayImgSrc)
+
 arrayImgOut = convert_img_txt(arrayImgSrc)
+
+print("convert to normal list")
+#print(arrayImgOut)
+
 arrayImgOut = bilinear_interpolation(arrayImgOut)
-#arrayImgOut = convert_txt_img(arrayImgOut)
+
+print("after bilineal")
+print(arrayImgOut)
 
 print("Src:")
-print(arrayImgSrc)
+#print(arrayImgSrc)
 print("\nOut:")
 print(arrayImgOut)
 
 imgDimensions = 390
 
-plt.imshow(arrayImgOut, interpolation='nearest')
-plt.show()
+#plt.imshow(arrayImgOut, interpolation='nearest')
+#plt.show()
 
-plt.imshow(arrayImgSrc, interpolation='nearest')
-plt.show()
+#plt.imshow(arrayImgSrc, interpolation='nearest')
+#plt.show()
 
 imgSrc = ImageTk.PhotoImage(image=Image.fromarray(arrayImgSrc))
-#imgOut = ImageTk.PhotoImage(image=Image.fromarray(arrayImgOut))
+imgOut = ImageTk.PhotoImage(image=Image.fromarray(arrayImgOut))
 
 
 

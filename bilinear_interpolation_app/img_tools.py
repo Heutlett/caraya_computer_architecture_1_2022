@@ -12,6 +12,7 @@ def printer(array2d):
 
         print()
 
+# Convierte una imagen RGB de pixeles [R,G,B] a pixeles B&W [B] 
 def convert_img_txt(array):
 
     array = array.tolist()
@@ -27,30 +28,11 @@ def convert_img_txt(array):
 
     return result
 
-def convert_txt_img(array):
-
-    result = []
-
-    for r in range(len(array)):
-        row = []
-        for c in range(len(array)):
-            row.append([array[r][c],array[r][c],array[r][c]])
-
-        result.append(row)
-
-    #SOLUCIONAR ESTO
-    for r in range(len(result)):
-        
-        result[r].append([0,0,0])
-        result[r].append([0,0,0])
-
-    result.append(result[0])
-    result.append(result[0])
-
-    return np.array(result)
-
+# Convierte una imagen a un np.array con pixeles pixeles [R,G,B] o B&W [B] dependiendo del formato de la imagen
 def convert_img_array_rgb(img_name):
 
     image  = imread("imgs/"+img_name)  
 
     return image
+    
+
