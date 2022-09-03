@@ -11,4 +11,5 @@
   string:
         .ascii "Hello, World!\n"
 
+  buffer: 
         

@@ -3,7 +3,8 @@
 
 .data 
 .balign 4
-ruta_archivo: .asciz "imagen.txt" 
+ruta_archivo:   .ascii "imagen.txt" 
+buffer:         .skip       400
 
 .text
 .global _start
@@ -17,14 +18,27 @@ _start:
 
 _leido:
 
-    mov r1, r0
-    ldr r0, =resultado
-    mov r2, #1                  // nbytes a leer
+    mov r1, r0                  // char *buf
+    ldr r0, =buffer             // unsigned int fd
+_prueba1:
+    lsl r0,r0, #2
+_prueba:
+    mov r2, #4                  // nbytes a leer
 
     mov r7, #3                  // Leer el archivo
     swi #0                      // Llamada al sistema
 
 _escribir:
+
+
+    mov R7, #4                  // Syscall number
+    mov R0, #1                  // Stdout is monitor
+    mov R2, #4                  // String is 14 chars long
+    ldr R1,=buffer              // String located at string
+    swi 0
+
+
+_cierra:
 
     mov r7, #6                  // Cerrar el archivo
     swi #0                      // Llamada al sistema

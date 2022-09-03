@@ -3,6 +3,8 @@ Compilar y enlazar:
 arm-none-eabi-as read_file.s -o read_file.o
 arm-none-eabi-ld read_file.o -o read_file
 
+./read_file
+
 -------------------------------------------
 
 (Terminal 1: Socket)
@@ -21,5 +23,8 @@ target remote localhost:1233
 
 print_hola_mundo
 
-arm-none-eabi-as print_hola_mundo.s -o print_hola_mundo.o
-arm-none-eabi-ld print_hola_mundo.o -o print_hola_mundo
+arm-none-eabi-as prueba.s -o prueba.o
+arm-none-eabi-ld prueba.o -o prueba
+
+
+./print_hola_mundo
