@@ -1,0 +1,50 @@
+ARM
+
+---------------------------------------------
+Compilar y enlazar:
+-------------------
+
+arm-none-eabi-as archivo.s -o archivo.o
+arm-none-eabi-as ejercicio.s -o ejercicio.o
+
+---------------------------------------------
+arm-none-eabi-ld archivo.o -o archivo
+arm-none-eabi-ld ejercicio.o -o ejercicio
+	
+||||||||||||||||||||||||||||||||||||||||||||||
+
+---------------------------------------------
+Ejecutar:
+---------
+
+(Terminal 1: Socket)
+qemu-arm -singlestep -g 1233 archivo   
+qemu-arm -singlestep -g 1233 ejercicio
+
+---------------------------------------------
+(Terminal 2: debugger)
+
+arm-none-eabi-gdb     
+
+file archivo
+file archivo
+
+target remote localhost:1233
+
+---------------------------------------------
+Ver elementos del codigo:
+-------------------------
+
+arm-none-eabi-objdump -d test
+arm-none-eabi-objdump -d test
+
+Ver registros:
+
+i r
+
+Ver memoria:
+
+x /1dw address
+x /1dw 0xfffef180
+
+

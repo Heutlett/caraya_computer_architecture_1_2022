@@ -1,0 +1,25 @@
+Compilar y enlazar:
+
+arm-none-eabi-as read_file.s -o read_file.o
+arm-none-eabi-ld read_file.o -o read_file
+
+-------------------------------------------
+
+(Terminal 1: Socket)
+qemu-arm -singlestep -g 1233 read_file  
+
+-------------------------------------------
+
+(Terminal 2: debugger)
+
+arm-none-eabi-gdb     
+file read_file
+target remote localhost:1233
+
+
+
+
+print_hola_mundo
+
+arm-none-eabi-as print_hola_mundo.s -o print_hola_mundo.o
+arm-none-eabi-ld print_hola_mundo.o -o print_hola_mundo

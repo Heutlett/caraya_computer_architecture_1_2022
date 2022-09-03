@@ -84,8 +84,8 @@ class Interfaz(ttk.Frame):
         button_cargarImg = ttk.Button(self.root_frame, text='Load image', style='my.TButton',
                                     command=self.fun_cargar_img).place(x=720,y=150)
 
-        button_iniciar = ttk.Button(self.root_frame, text='Ejecutar interpolación bilinear', style='my2.TButton',
-                                          command=self.fun_ejecutar_interpolacion).place(x=1120,y=150)
+        button_iniciar = ttk.Button(self.root_frame, text='Execute', style='my2.TButton',
+                                          command=self.fun_ejecutar_interpolacion).place(x=1320,y=150)
 
         label1 = tk.Label(self.root_frame, text='Source Image',font=("Helvetica", 24)).place(x=250-100, y=260)
         label2 = tk.Label(self.root_frame, text='Select one quadrant',font=("Helvetica", 24)).place(x=850-180, y=260)
