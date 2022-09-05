@@ -13,4 +13,4 @@ gdb read_file_dec
 
 b _end
 r
-p /x (char[11])text
+p /x (char[15])text

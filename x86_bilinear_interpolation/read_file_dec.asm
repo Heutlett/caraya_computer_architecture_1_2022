@@ -7,10 +7,14 @@ section .data
 
         new_line    db "",10
 
+        array TIMES     100 db 0b    ; Arreglo de resultados
+                                    ; Son 11 espacios para guardar primero la seed
+                                    ; y luego los 10 randoms generados
+
 section .bss
         text    resb    100
 
-        array   resb    100
+
 
 section .text
         global _start
@@ -32,12 +36,12 @@ _start:
         mov rdi, rax
         mov rax, 0          ; SYS_READ
         mov rsi, text
-        mov rdx, 11          ; size_t
+        mov rdx, 15          ; size_t
         syscall
 
 
 
-_convert_hex_dec:
+_print_file:
 
         ;mov rax,    text
 
@@ -61,6 +65,34 @@ _convert_hex_dec:
         mov rdx, 1
 
         syscall
+
+
+        mov r8, 15  ; N
+        mov rdx, 0  ; Contador
+
+        mov rax, array  ; Puntero array
+        mov rbx, text   ; Puntero txt
+
+_convert_ascii_dec:
+
+        cmp rdx, r8        ; Contador == N
+
+        je _end             ; Si Contador == 100, salta a end
+
+        mov rcx, [rbx]  ; Guarda en rdx el valor del txt en la posicion del puntero rbx
+
+        inc rbx         ; Se mueve el puntero de txt
+
+        mov [rax], rcx  ; Guarda en rdx array el valor de rdx en la posicion del puntero rax
+
+        inc rax         ; Se mueve el puntero array
+
+        add rdx, 1      ; se aumenta el contador
+
+        jmp _convert_ascii_dec
+
+
+
 
 _end:
         ; Cierra el archivo
