@@ -24,11 +24,17 @@ _prueba:
         mov rdi, rax
         mov rax, 0          ; SYS_READ
         mov rsi, text
-        mov rdx, 10          ; size_t
+        mov rdx, 11          ; size_t
         syscall
 
 _end:
 
         mov rax, 3
         pop rdi
+        syscall
+
+        ; Termina el programa
+
+        mov rax, 60
+        mov rdi, 0
         syscall

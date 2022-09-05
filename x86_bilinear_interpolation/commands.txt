@@ -1,0 +1,16 @@
+nasm -felf64 -o read_file.o read_file.asm
+ld -o read_file read_file.o
+gdb read_file
+
+b _end
+r
+p /x (char[11])text
+
+
+nasm -felf64 -o read_file_dec.o read_file_dec.asm
+ld -o read_file_dec read_file_dec.o
+gdb read_file_dec
+
+b _end
+r
+p /x (char[11])text
