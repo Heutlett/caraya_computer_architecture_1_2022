@@ -13,6 +13,7 @@ section .data
 
 section .bss
         text    resb    100
+        
 
 
 
@@ -68,7 +69,7 @@ _print_file:
 
 
         mov r8, 50  ; N
-        mov r14, 0  ; Contador
+        ;mov r14, 0  ; Contador
 
 
         mov r9, 100 ; Multiplicador
@@ -84,9 +85,9 @@ _print_file:
 
 _convert_ascii_dec:
 
-        cmp r14, r8        ; Contador == N
+        ;cmp r14, r8        ; Contador == N
 
-        je _end             ; Si Contador == 100, salta a end
+        ;je _end             ; Si Contador == 100, salta a end
 
         mov rcx, [rbx]  ; Guarda en rcx el valor del txt en la posicion del puntero rbx
         inc rbx         ; Se mueve el puntero de txt
@@ -100,7 +101,7 @@ _convert_ascii_dec:
         je _espacio
 
         mov r10, -48    ; Hex de fin
-        cmp rcx, r10    ; Si encuentra un espacio
+        cmp rcx, r10    ; Si encuentra el fin
         je _espacio
 
 
@@ -132,6 +133,12 @@ _espacio:
 
         mov r9, 100
         mov r11, 0
+
+
+        mov r10, -48    ; Hex de fin
+        cmp rcx, r10    ; Si encuentra el fin
+        je _end
+
 
         jmp _convert_ascii_dec
 
