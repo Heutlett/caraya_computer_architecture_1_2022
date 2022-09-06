@@ -14,3 +14,14 @@ gdb read_file_dec
 b _end
 r
 p /x (char[15])text
+
+nasm -felf64 -o div.o div.asm
+ld -o div div.o
+gdb div
+
+nasm -felf64 -o mul.o mul.asm
+ld -o mul mul.o
+gdb mul
+
+
+p /d (char[15])array

@@ -67,31 +67,73 @@ _print_file:
         syscall
 
 
-        mov r8, 15  ; N
-        mov rdx, 0  ; Contador
+        mov r8, 50  ; N
+        mov r14, 0  ; Contador
 
-        mov rax, array  ; Puntero array
+
+        mov r9, 100 ; Multiplicador
+
+        mov r11, 0      ; Num
+        mov r13, 10
+
+
+        mov r12, array  ; Puntero array
         mov rbx, text   ; Puntero txt
+
+        mov r15, 0xff
 
 _convert_ascii_dec:
 
-        cmp rdx, r8        ; Contador == N
+        cmp r14, r8        ; Contador == N
 
         je _end             ; Si Contador == 100, salta a end
 
-        mov rcx, [rbx]  ; Guarda en rdx el valor del txt en la posicion del puntero rbx
-
+        mov rcx, [rbx]  ; Guarda en rcx el valor del txt en la posicion del puntero rbx
         inc rbx         ; Se mueve el puntero de txt
 
-        mov [rax], rcx  ; Guarda en rdx array el valor de rdx en la posicion del puntero rax
+        and rcx, r15
 
-        inc rax         ; Se mueve el puntero array
+        sub rcx, 48
 
-        add rdx, 1      ; se aumenta el contador
+        mov r10, -16    ; Hex de espacio
+        cmp rcx, r10    ; Si encuentra un espacio
+        je _espacio
+
+        mov r10, -48    ; Hex de fin
+        cmp rcx, r10    ; Si encuentra un espacio
+        je _espacio
+
+
+_continua:
+        
+        mov rax, r9
+        mul rcx
+
+        add r11, rax
+
+_div:
+        mov rdx, 0  ; 0 para div
+        mov rax, r9
+        div r13
+        mov r9, rax
+_div2:
+        
+        add r14, 1      ; se aumenta el contador
 
         jmp _convert_ascii_dec
 
 
+_espacio:
+
+        ; rcx tiene el valor 
+
+        mov [r12], r11  ; Guarda en rdx array el valor de rdx en la posicion del puntero r12
+        inc r12         ; Se mueve el puntero array
+
+        mov r9, 100
+        mov r11, 0
+
+        jmp _convert_ascii_dec
 
 
 _end:
