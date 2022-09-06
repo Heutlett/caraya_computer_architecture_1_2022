@@ -10,54 +10,63 @@ SYS_WRITE   equ 1
 
 O_RDONLY    equ 0
 
-ARRAY_SIZE   equ  4
+
 
 
 
 section .data
-        filename    db  "imagen.txt",0
+        filename        db  "imagen.txt",0
 
-        msg1        db "Contenido del archivo:",0
-        msg2        db "Contenido de la matriz resultante:",0
+        msg1            db  "Contenido del archivo:",0
+        msg2            db  "Contenido de la matriz resultante:",0
 
+        new_line        db "",  10          ; Valor de una nueva linea para imprimir
+
+        ; ------------------- CONSTANTES -----------------------------------------
         
-
-        new_line    db "",10
-
-        array TIMES 100 db 0
-
+        %assign FILE_SIZE   15
+        %assign MASK        0xff
+        %assign ARRAY_SIZE  4
+        %assign ASCII_SPACE -16
+        %assign ASCII_END   -48
 
 section .bss
-        text    resb    100
+        text            resb    100         ; Contenido del texto leido del archivo
 
-        digitSpace resb 100
-	    digitSpacePos resb 8
+        digitSpace      resb    100         ; Variables usadas para 
+	    digitSpacePos   resb    8
 
-  
-
+        array           resb    100         ; Arreglo de elementos de la imagen
 
 section .text
         global _start
 
 _start:
 
-        ; Se abre el archivo
+        ; [SYSCALL: OPEN]   |   Se abre el archivo
 
-        mov rax,    SYS_OPEN    ; Abre el archivo
-        mov rdi,    filename    ; Nombre del archivo
-        mov rsi,    O_RDONLY    ; Modo lectura
+        mov rax, SYS_OPEN    ; %rax          : 0x02                  |   Abre el archivo
+        mov rdi, filename    ; arg0 (%rdi)   : const char *filename  |   Nombre del archivo
+        mov rsi, O_RDONLY    ; arg2 (%rdx)   : umode_t mode          |   Modo lectura
         syscall
 
-        ; Se lee el archivo
+        ; [SYSCALL: READ]   |   Se abre el archivoSe lee el archivo
 
-        push    rax
+        push rax                ; Pone en el stack fd para cerrar el archivo al final
 
-        mov rdi, rax
-        mov rax, SYS_READ       ; Lee el archivo
-
-        mov rsi, text
-        mov rdx, 15             ; size_t
+        mov rdi, rax            ; arg0 (%rdi)   : unsigned int fd   |   Identificador del archivo abierto
+        mov rax, SYS_READ       ; %rax          : 0x00              |   Lee el archivo
+        mov rsi, text           ; arg1 (%rsi)   : char *buf         |   Buffer donde se guardara el contenido del archivo
+        mov rdx, FILE_SIZE       ; arg2 (%rdx)   : size_t            |   Cantidad de caracteres que se van a leer
         syscall
+
+        ; [SYSCALL: CLOSE]   |   Se cierra el archivo
+
+        mov rax, SYS_CLOSE      ; %rax          : 0x00              |   Lee el archivo
+        pop rdi                 ; arg0 (%rdi)   : unsigned int fd   |   Archivo a cerrar
+        syscall
+
+        ; Imprime el texto que se ha leido
 
         mov rax, msg1
         call _print
@@ -65,48 +74,43 @@ _start:
         mov rax, text
         call _print
 
-
-
-_inicio:
-
-        mov r9, 100 ; Multiplicador
-
-        mov r11, 0      ; Num
-
+;   Convierte el contenido del archivo txt de formato ascii a un arreglo de enteros
+_convert_ascii_dec:
 
         mov r12, array  ; Puntero array
         mov rbx, text   ; Puntero txt
 
-        mov r15, 0xff   ; Mascara
+        mov r9, 100     ; Multiplicador
+
+        mov r11, 0      ; Num
 
 
+_convert_ascii_dec_loop:
 
-_convert_ascii_dec:
+        ; Extraccion del caracter correspondiente a cada numero
 
-        mov rcx, [rbx]  ; Guarda en rcx el valor del txt en la posicion del puntero rbx
-        inc rbx         ; Se mueve el puntero de txt
+        mov rcx, [rbx]          ; Guarda en rcx el valor del txt en la posicion del puntero rbx
+        inc rbx                 ; Se mueve el puntero de txt
 
-        and rcx, r15    ; Mascara obtener unicamente el primer caracter del registro
+        and rcx, MASK           ; Mascara obtener unicamente el primer caracter del registro
 
-        sub rcx, 48     ; Se resta 48 para convertir de char a int
+        sub rcx, 48             ; Se resta 48 para convertir de char a int
 
-        mov r10, -16    ; Hex de espacio
-        cmp rcx, r10    ; Si encuentra un espacio
-        je _espacio
+        cmp rcx, ASCII_SPACE    ; Si encuentra un espacio
+        je _space
 
-        mov r10, -48    ; Hex de fin
-        cmp rcx, r10    ; Si encuentra un espacio
-        je _espacio
+        cmp rcx, ASCII_END      ; Si encuentra un espacio
+        je _space
 
-
-_mult:
+        ; Multiplicacion para la magnitud
         
         mov rax, r9     ; Se mueve el valor actual del multiplicador (100, 10, 1) a rax
         mul rcx         ; Se realiza la multiplicacion rax*rcx y se guarda en rax
 
         add r11, rax    ; Se aumenta el valor actual del numero guardado en r11
 
-_div:
+        ; Se divide el multiplicador para la magnitud de la siguiente iteracion
+
         mov rdx, 0      ; 0 utilizado en la division para evitar error
         mov rax, r9     ; Se mueve el multiplicador a rax para dividirlo entre 10
         mov r10, 10     ; Se mueve 10 al temporal para dividir el multiplador entre 10
@@ -114,29 +118,25 @@ _div:
         mov r9, rax     ; Se actualiza el valor de r9
         
         add r14, 1      ; Se aumenta el contador
-        jmp _convert_ascii_dec
+        jmp _convert_ascii_dec_loop
 
 
-_espacio:
+_space:
 
-        ; rcx tiene el valor 
+        mov [r12], r11      ; Guarda en la posicion r12 del array el valor de r11
+        inc r12             ; Se mueve el puntero del array
 
-        mov [r12], r11  ; Guarda en rdx array el valor de rdx en la posicion del puntero r12
-        inc r12         ; Se mueve el puntero array
+        mov r9, 100         ; Resetea el multiplicador
+        mov r11, 0          ; Resetea el numero actual
 
-        mov r9, 100
-        mov r11, 0
-
-
-        mov r10, -48    ; Hex de fin
-        cmp rcx, r10    ; Si encuentra el fin
+        cmp rcx, ASCII_END  ; Si encuentra el fin
         je _end
 
-        jmp _convert_ascii_dec
+        jmp _convert_ascii_dec_loop
 
-
-;input: rax as pointer to string
-;output: print string at rax
+;   Imprime el string al que apunta el registro rax
+;   input:  rax: puntero al string
+;   output: string al que apunta rax
 _print:
         push rax
         mov rbx, 0
@@ -227,7 +227,7 @@ _printRAXLoop:
 
 _printRAXLoop2:
         mov rcx, [digitSpacePos]
-_prueba3:
+
         mov rax, SYS_WRITE
         mov rdi, STDOUT
         mov rsi, rcx        ; Se imprime el contenido de rsi
@@ -244,23 +244,15 @@ _prueba3:
         ret
 
 _end:
+        ; Se imprime el contenido del array
 
-        ; Imprime el contenido del array
-
-        mov rax, array
-
-_end2:
         mov rax, msg2
         call _print
 
         mov rax, array
         call _printNums
 
-        ; Cierra el archivo
-
-        mov rax, 3
-        pop rdi
-        syscall
+        
 
         ; Termina el programa
 
