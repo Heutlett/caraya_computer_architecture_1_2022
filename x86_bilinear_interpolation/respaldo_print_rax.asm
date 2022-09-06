@@ -17,8 +17,8 @@ ARRAY_SIZE   equ  4
 section .data
         filename    db  "imagen.txt",0
 
-        msg1        db "Contenido del archivo:",0
-        msg2        db "Contenido de la matriz resultante:",0
+        msg1        db "Contenido del archivo:",10,0
+        msg2        db "Contenido de la matriz resultante:",10,0
 
         
 
@@ -63,6 +63,12 @@ _start:
         call _print
 
         mov rax, text
+        call _print
+
+        mov rax, new_line
+        call _print
+
+        mov rax, new_line
         call _print
 
 
@@ -138,6 +144,7 @@ _espacio:
 ;input: rax as pointer to string
 ;output: print string at rax
 _print:
+
         push rax
         mov rbx, 0
 
@@ -148,106 +155,94 @@ _printLoop:
         cmp cl, 0
         jne _printLoop
 
-        mov rax, SYS_WRITE
+        mov rax, 1
         mov rdi, STDOUT
-        pop rsi             ; Se imprime el contenido de rsi
+        pop rsi
         mov rdx, rbx
         syscall
 
-        call _print_new_line
-        call _print_new_line
-
         ret
 
-_print_new_line:
 
-        mov rax, SYS_WRITE
-        mov rdi, STDOUT
-        mov rsi, new_line   ; Se imprime un salto de linea
-        mov rdx, 1          ; Size
-        syscall
-
-        ret
 
 ; inputs:   rax=array
 
 _printNums:
 
-        mov r8, ARRAY_SIZE       ; IMPORTANTE: VALOR DE N
-        mov r9, 0
-        mov r10, rax
-        mov r15, 0xff   ; Mascara
+    mov r8, ARRAY_SIZE       ; IMPORTANTE: VALOR DE N
+    mov r9, 0
+    mov r10, rax
+    mov r15, 0xff   ; Mascara
 
 _printNumsLoop:
 
-        cmp r9, r8
-        je  _printNumsEnd
+    cmp r9, r8
+    je  _printNumsEnd
 
-        mov rax, [r10]
-        and rax, r15
+    mov rax, [r10]
+    and rax, r15
 
-        call _printRAX
+_prueba:
 
-        inc r10
+    call _printRAX
 
-        add r9,1
+    inc r10
 
-        jmp _printNumsLoop
+    add r9,1
+
+    jmp _printNumsLoop
 
 _printNumsEnd:
 
-        call _print_new_line
-        call _print_new_line
-
-        ret 
+    ret 
 
 
 _printRAX:
-        mov rcx, digitSpace
-        mov rbx, 32
-        mov [rcx], rbx
-        inc rcx
-        mov [digitSpacePos], rcx
+	mov rcx, digitSpace
+	mov rbx, 10
+	mov [rcx], rbx
+	inc rcx
+	mov [digitSpacePos], rcx
 
 _printRAXLoop:
-        mov rdx, 0
-        mov rbx, 10
-        div rbx
-        push rax
-        add rdx, 48
+	mov rdx, 0
+	mov rbx, 10
+	div rbx
+	push rax
+	add rdx, 48
 
-        mov rcx, [digitSpacePos]
-        mov [rcx], dl
-        inc rcx
-        mov [digitSpacePos], rcx
-        
-        pop rax
-        cmp rax, 0
-        jne _printRAXLoop
+	mov rcx, [digitSpacePos]
+	mov [rcx], dl
+	inc rcx
+	mov [digitSpacePos], rcx
+	
+	pop rax
+	cmp rax, 0
+	jne _printRAXLoop
 
 _printRAXLoop2:
-        mov rcx, [digitSpacePos]
-_prueba3:
-        mov rax, SYS_WRITE
-        mov rdi, STDOUT
-        mov rsi, rcx        ; Se imprime el contenido de rsi
-        mov rdx, 1
-        syscall
+	mov rcx, [digitSpacePos]
 
-        mov rcx, [digitSpacePos]
-        dec rcx
-        mov [digitSpacePos], rcx
+	mov rax, 1
+	mov rdi, 1
+	mov rsi, rcx        ; Se imprime el contenido de rsi
+	mov rdx, 1
+	syscall
 
-        cmp rcx, digitSpace
-        jge _printRAXLoop2
+	mov rcx, [digitSpacePos]
+	dec rcx
+	mov [digitSpacePos], rcx
 
-        ret
+	cmp rcx, digitSpace
+	jge _printRAXLoop2
+
+	ret
 
 _end:
 
         ; Imprime el contenido del array
 
-        mov rax, array
+    mov rax, array
 
 _end2:
         mov rax, msg2
