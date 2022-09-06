@@ -39,4 +39,9 @@ nasm -felf64 -o print_ints.o print_ints.asm
 ld -o print_ints print_ints.o
 gdb mul
 
+
+nasm -felf64 -o arreglo.o arreglo.asm
+ld -o arreglo arreglo.o
+gdb mul
+
 p /d (char[15])array

@@ -10,6 +10,8 @@ SYS_WRITE   equ 1
 
 O_RDONLY    equ 0
 
+ARRAY_SIZE   equ  4
+
 
 
 section .data
@@ -18,11 +20,11 @@ section .data
         msg1        db "Contenido del archivo:",10,0
         msg2        db "Contenido de la matriz resultante:",10,0
 
-        arraySize   db  4
+        
 
         new_line    db "",10
 
-        
+        array TIMES 100 db 0
 
 
 section .bss
@@ -31,7 +33,7 @@ section .bss
         digitSpace resb 100
 	    digitSpacePos resb 8
 
-        array   resb 100    
+  
 
 
 section .text
@@ -167,7 +169,7 @@ _printLoop:
 
 _printNums:
 
-    mov r8, arraySize       ; IMPORTANTE: VALOR DE N
+    mov r8, ARRAY_SIZE       ; IMPORTANTE: VALOR DE N
     mov r9, 0
     mov r10, rax
     mov r15, 0xff   ; Mascara
@@ -187,6 +189,8 @@ _prueba:
     inc r10
 
     add r9,1
+
+    jmp _printNumsLoop
 
 _printNumsEnd:
 
@@ -221,7 +225,7 @@ _printRAXLoop2:
 
 	mov rax, 1
 	mov rdi, 1
-	mov rsi, rcx
+	mov rsi, rcx        ; Se imprime el contenido de rsi
 	mov rdx, 1
 	syscall
 
@@ -238,6 +242,9 @@ _end:
 
         ; Imprime el contenido del array
 
+    mov rax, array
+
+_end2:
         mov rax, msg2
         call _print
 
