@@ -217,9 +217,13 @@ def horizontal_optimized_calc(I,last_index):
             c2 = index + 3
             vc2 = I_out2[c2-1]
 
-            print("vc1 y vc2 -------------------------")
-            print(vc1)
-            print(vc2)
+            print("---------------")
+
+            print("c1: ", c1)
+            print("c2: ", c2)
+            print("vc1: ", vc1)
+            print("vc2: ", vc2)
+            
         
 
         if(col_out%3!=0 and row_out%3==0):

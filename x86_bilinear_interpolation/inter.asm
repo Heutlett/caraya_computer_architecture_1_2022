@@ -15,6 +15,14 @@ SYS_EXIT    equ 60
 ;       Instruccion para imprimir un salto de linea:
 ;       print_console new_line,1 
 
+%macro printRAX_push_out 0
+
+        push_registers
+        call _printRAX
+        pop_registers
+
+%endmacro 
+
 %macro push_registers 0
         push rbx        ; rbx
         push rcx        ; rcx
@@ -76,6 +84,17 @@ section .data
         msg2            db  "Contenido de la matriz inicial:",0
         msg3            db  "--------------------   Creando matriz resultante   ---------------------",0
         msg4            db  "Matriz resultante con valores conocidos:",0
+        msgCol          db  "col_out: ",0
+        msgRow          db  "row_out: ",0
+        msgC1           db  "c1: ",0
+        msgC2           db  "c2: ",0
+        msgVC1          db  "vc1: ",0
+        msgVC2          db  "vc2: ",0
+        msgIndex        db  "index: ",0   
+        msgModCol       db  "modCol: ",0
+        msgModRow       db  "modRow: ",0
+        msgNewValue     db  "NewValue",0
+        msgPrueba       db  "prueba", 0    
 
         new_line        db "",  10          ; Valor de una nueva linea para imprimir
         tab             db "",9
@@ -105,10 +124,10 @@ section .bss
 
         mod_result      resb    1
 
-        c1              resb    1
-        c2              resb    1
-        vc1             resb    1
-        vc2             resb    1
+        c1              resb    8
+        c2              resb    8
+        vc1             resb    8
+        vc2             resb    8
 
 section .text
         global _start
@@ -463,6 +482,8 @@ _horizontal_calc_loop:
         cmp r10, ARRAY_OUT_SIZE_1
         je      _end
 
+        mov rax, 0
+        mov rax, r8
 
         ; Calcula el mod de las filas y columnas
         push rax
@@ -521,49 +542,32 @@ _new_row_horizontal:
 
 
 _horizontal_null_value:
+  
+        print_console new_line,1
+        print_console msgPrueba,6
+        print_console new_line,1
 
-        mov r15, rax            ; respaldo rax
         mov rax, r11
         mov [c1], rax
 
-        ;push rax
-
         mov rax, r11
         sub rax, 1
         add rax, array_out            ; addressing: array + c1-1
         mov rax, [rax]          ;vc1 = I_out2[c1-1]
         and rax, MASK
-
         mov [vc1], rax
-
-        ;push rax
-
-        push_registers
-        call _printRAX
-        pop_registers
 
         mov rax, r11
         add rax, 3
-
         mov [c2], rax
-
-        ;push rax
 
         sub rax, 1
         add rax, array_out            ; addressing: array + c1-1
         mov rax, [rax]          ;vc1 = I_out2[c1-1]
         and rax, MASK
-
         mov [vc2], rax
 
-        ;push rax
-
-
-        push_registers
-        call _printRAX
-        pop_registers
-
-        mov rax, r15
+_prueba2:
 
         jmp _continue_horizontal_null_value
 
@@ -577,8 +581,7 @@ _put_new_value_1:
 
 _put_new_value_2:
 
-
-        mov r15, rax            ; respaldo rax
+        ;print_console msgNewValue,8
 
         mov rax, r10
 
