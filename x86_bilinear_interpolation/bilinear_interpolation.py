@@ -130,11 +130,16 @@ def bilinear_interpolation(I):
 
     return I_out
 
-#   Matrices de prueba    
+#   Matrices de prueba  
+# 10;20;30;40
+# 30;40;50;60
+# 50;60;70;80
+# 70;80;90;0
+#   
 
 #I = [[10,20],[30,40]]           #   Imagen inicial
 
-#I = [[10,20,30],[40,50,60],[70,80,90]]           #   Imagen inicial
+#I = [[10,20,30,40],[30,40,50,60],[50,60,70,80], [70,80,90,0]]           #   Imagen inicial
 
 #I = [[1,2,3,4],[5,6,7,8],[9,10,11,12],[13,14,15,16]]           #   Imagen inicial
 
@@ -143,9 +148,3 @@ def bilinear_interpolation(I):
 #I = [[30,40],[10,20]]           #   Imagen inicial
 
 
-
-
-#print("\nI:")
-#printer(I)
-#print("\nI_out:")
-#printer(I_out)

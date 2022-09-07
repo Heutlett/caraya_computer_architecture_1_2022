@@ -41,7 +41,7 @@ def calc_interpolation(c1,c2,i,vc1,vc2):
 
     result = round(((c2-i)/(c2-c1))*vc1 + ((i-c1)/(c2-c1))*vc2)
 
-    #print("num(",i,") = ((",c2,"-",i,")/(",c2,"-",c1,"))*",vc1," + ((",i,"-",c1,")/(",c2,"-",c1,"))*",vc2,"=",result)
+    print("num(",i,") = ((",c2,"-",i,")/(",c2,"-",c1,"))*",vc1," + ((",i,"-",c1,")/(",c2,"-",c1,"))*",vc2,"=",result)
 
     return result
 
@@ -185,6 +185,15 @@ def bilinear_optimized(I, n_src):
 
 # Genera la matriz inicial con el tamano final y los valores conocidos colocados, los no conocidos se ponen -1
 
+def fill_null_values(I):
+
+    I2 = I
+
+    for i in range(len(I2)):
+        I2[i] = -1
+
+    return I2
+
 def generate_initial_Iout(I, n_src):
 
     
@@ -196,6 +205,7 @@ def generate_initial_Iout(I, n_src):
     print()
 
     I_out2 = np.zeros(tamano)
+    I_out2 = fill_null_values(I_out2)
 
     col_out = 0
     row_out = 0
@@ -206,7 +216,7 @@ def generate_initial_Iout(I, n_src):
 
     for c in range(len(I_out2)):
 
-        print("Row: ",row_out, " Col: ", col_out)
+        #print("Row: ",row_out, " Col: ", col_out)
 
         if(col_out%3==0 and row_out%3==0):
             I_out2[c] = I[index_src]
@@ -221,6 +231,96 @@ def generate_initial_Iout(I, n_src):
         
     return I_out2
 
+def interpolation_optimized(I, n_src):
+
+    tamano = n_src*n_src
+    print("Size of IOUT: ", tamano)
+
+    last_index = n_src-1
+    print("Last Index: ", last_index)
+    
+    print()
+
+    I_out2 = I
+
+    col_out = 0
+    row_out = 0
+
+    index = 1
+
+
+    for c in range(len(I_out2)-1):
+        
+        if(col_out%3==0 and row_out%3==0):
+
+            print(index)
+
+            c1 = index 
+            c2 = index + 3
+            vc1 = I_out2[c1-1]
+            vc2 = I_out2[c2-1]
+        
+
+        if(col_out%3!=0 and row_out%3==0):
+            
+
+            if(I_out2[c] == -1.0):
+                
+                I_out2[c] = calc_interpolation(c1,c2,index,vc1,vc2)
+                #print("Row: ",row_out, " Col: ", col_out)
+
+        if (col_out == last_index):
+            col_out = -1
+            row_out = row_out +1
+
+        index = index + 1
+
+        col_out = col_out + 1
+
+        
+    return I_out2
+
+
+    #   Calcula el valor de pixel de interpolacion
+#   Parametros:     c1:     indice conocido1
+#                   c2:     indice conocido2
+#                   i:      indice numero a calcular
+#                   vc1:    valor del conocido1
+#                   vc2:    valor del conocido2
+# def calc_interpolation(c1,c2,i,vc1,vc2):   
+
+#     result = round(((c2-i)/(c2-c1))*vc1 + ((i-c1)/(c2-c1))*vc2)
+
+#     #print("num(",i,") = ((",c2,"-",i,")/(",c2,"-",c1,"))*",vc1," + ((",i,"-",c1,")/(",c2,"-",c1,"))*",vc2,"=",result)
+
+#     return result
+
+
+def test_algorithm():
+
+    I = [[10,20,30,40],[30,40,50,60],[50,60,70,80], [70,80,90,0]]           #   Imagen inicial
+
+
+    I_out = bilinear_interpolation(I)
+
+    I_test = [[10,13,17,20,23,27,30,33,37,40],
+            [17,20,24,27,30,34,37,40,44,47],
+            [23,26,30,33,36,40,43,46,50,53],
+            [30,33,37,40,43,47,50,53,57,60],
+            [37,40,44,47,50,54,57,60,64,67],
+            [43,46,50,53,56,60,63,66,70,73],
+            [50,53,57,60,63,67,70,73,77,80],
+            [57,60,64,67,70,74,77,69,61,53],
+            [63,66,70,73,76,80,83,64,46,27],
+            [70,73,77,80,83,87,90,60,30,0]]
+
+    if (I_test == I_out):
+
+        print("EXITO:   El algoritmo funciona correctamente")
+
+    else: 
+        
+        print("ERROR:   El algoritmo tiene errores")
 
         
 
@@ -242,7 +342,7 @@ def generate_initial_Iout(I, n_src):
 #I_2 = np.array([10,20,30,40])
 #n_src = 2
 
-I_2 = np.array([10,20,10,20,30,40,30,40,10,20,10,20,30,40,10,20])
+I_2 = np.array([10,20,30,40,30,40,50,60,50,60,70,80,70,80,90,0])
 n_src = 4
 
 
@@ -256,6 +356,16 @@ tamano = last_index_src*3+1
 #I_out2 = bilinear_optimized(I_2,n_src)
 
 print("\nI2:")
-print(I_2)
+printerArray(I_2,4)
 print("\nI_out:")
 printerArray(I_out2,tamano)
+
+
+n_src = 10
+nm_src = n_src*n_src
+
+I_out2 = interpolation_optimized(I_out2,n_src)
+
+printerArray(I_out2,10)
+
+#test_algorithm()
