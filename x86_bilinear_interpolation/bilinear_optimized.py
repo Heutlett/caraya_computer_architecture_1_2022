@@ -213,15 +213,21 @@ def horizontal_optimized_calc(I,last_index):
         if(col_out%3==0 and row_out%3==0):
 
             c1 = index 
-            c2 = index + 3
             vc1 = I_out2[c1-1]
+            c2 = index + 3
             vc2 = I_out2[c2-1]
+
+            print("vc1 y vc2 -------------------------")
+            print(vc1)
+            print(vc2)
         
 
         if(col_out%3!=0 and row_out%3==0):
             
 
             if(I_out2[c] == -1.0):
+
+
                 
                 I_out2[c] = calc_interpolation(c1,c2,index,vc1,vc2)
                 #print("Row: ",row_out, " Col: ", col_out)

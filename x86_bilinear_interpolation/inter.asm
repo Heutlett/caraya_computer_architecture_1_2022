@@ -84,6 +84,7 @@ section .data
         %assign FILE_SIZE       15
         %assign ARRAY_SRC_SIZE      4
         %assign ARRAY_OUT_SIZE  16
+        %assign ARRAY_OUT_SIZE_1  15
         %assign ROW_SIZE_SRC    2
         %assign ROW_SIZE_OUT    4
 
@@ -103,6 +104,11 @@ section .bss
         array_out       resb    16
 
         mod_result      resb    1
+
+        c1              resb    1
+        c2              resb    1
+        vc1             resb    1
+        vc2             resb    1
 
 section .text
         global _start
@@ -449,24 +455,51 @@ _horizontal_calc:
         mov r12, ROW_SIZE_OUT   ; last_index_out
         sub r12, 1
 
+        mov r15, 0
+
 _horizontal_calc_loop:
 
 
-        cmp r10, ARRAY_OUT_SIZE
+        cmp r10, ARRAY_OUT_SIZE_1
         je      _end
 
+
+        ; Calcula el mod de las filas y columnas
         push rax
-        mov rax, r10
+        push rbx
+        push rdx
 
-        push_registers
-        call _printRAX
-        pop_registers
+        mov rax, r8
+        mov rbx, 3
+        modulo          
+        mov r13,rax     ; r13 = mod_col
 
+        mov rax, r9
+        mov rbx, 3
+
+        modulo          
+        mov r14, rax    ; r14 = mod_row
+        mov r15, 0
+        add r15, r13    
+        add r15, r14    ; r15 = mod_col + mod_row
+
+        pop rdx
+        pop rbx
         pop rax
 
+        cmp r15, 0
+        je      _horizontal_null_value
+
+_continue_horizontal_null_value:
+
+        cmp r13, 0
+        jne     _put_new_value_1
+
+_continue_put_new_value:
 
         cmp r8, r12            ; if (col_out == last_index_out)
         je      _new_row_horizontal        ; nueva fila
+
 
 _continue_new_row_horizontal:
 
@@ -485,6 +518,180 @@ _new_row_horizontal:
         inc r9                  ; row_out = row_out +1
 
         jmp _continue_new_row_horizontal
+
+
+_horizontal_null_value:
+
+        mov r15, rax            ; respaldo rax
+        mov rax, r11
+        mov [c1], rax
+
+        ;push rax
+
+        mov rax, r11
+        sub rax, 1
+        add rax, array_out            ; addressing: array + c1-1
+        mov rax, [rax]          ;vc1 = I_out2[c1-1]
+        and rax, MASK
+
+        mov [vc1], rax
+
+        ;push rax
+
+        push_registers
+        call _printRAX
+        pop_registers
+
+        mov rax, r11
+        add rax, 3
+
+        mov [c2], rax
+
+        ;push rax
+
+        sub rax, 1
+        add rax, array_out            ; addressing: array + c1-1
+        mov rax, [rax]          ;vc1 = I_out2[c1-1]
+        and rax, MASK
+
+        mov [vc2], rax
+
+        ;push rax
+
+
+        push_registers
+        call _printRAX
+        pop_registers
+
+        mov rax, r15
+
+        jmp _continue_horizontal_null_value
+
+_put_new_value_1:
+
+        cmp r14, 0
+        je _put_new_value_2
+
+        jmp _continue_put_new_value
+
+
+_put_new_value_2:
+
+
+        mov r15, rax            ; respaldo rax
+
+        mov rax, r10
+
+        add rax, array_out
+
+        push rax                ; direccion donde se guarda en el stack
+
+        mov rax, [rax]
+
+        and rax, MASK
+
+        cmp rax, 0
+        je _put_new_value_3
+
+
+        pop rax
+
+        jmp _continue_put_new_value
+
+_put_new_value_3:
+
+        pop rax
+
+        call _calc_interpolation
+
+        mov [rax], r15
+
+        jmp _continue_put_new_value
+
+_calc_interpolation:
+
+;   Parametros:     c1:         indice conocido1
+;                   c2:         indice conocido2
+;                   i: r8         indice numero a calcular
+;                   vc1:        valor del conocido1
+;                   vc2:        valor del conocido2
+
+;         push rax
+;         push rbx
+;         push rcx
+;         push rdx
+;         push 8
+;         push r9
+;         push r10
+;         push r11
+;         push r12
+
+
+;         mov r8,r11       ; r8 = i
+;         mov r9, [c1]
+;         and r9, MASK
+;         mov r10, [vc1]
+;         and r10, MASK
+;         mov r11, [c2]
+;         and r11, MASK
+;         mov r12, [vc2]
+;         and r12, MASK
+; _prueba:
+
+;         ; ((c2-i)/(c2-c1))*vc1
+;         mov rcx, 0     ; izq
+;         mov rcx, r11
+;         sub rcx, r8     ;(c2-i)
+
+;         mov rbx, 0
+;         mov rbx, r11
+;         sub rbx, r9     ;(c2-c1)
+
+;         mov rdx, 0      ; 0 utilizado en la division para evitar error
+;         mov rax, rcx    ; (c2-i)
+;         div rbx         ; rax/(c2-c1)
+;         mov rbx, rax    ; ((c2-i)/(c2-c1))
+
+;         mov rax, r10
+;         mul rbx         ; ((c2-i)/(c2-c1))*vc1
+
+;         push rbx
+
+;         ; ((i-c1)/(c2-c1))*vc2
+;         mov rcx, 0     ; der
+;         mov rcx, r8
+;         sub rcx, r9     ;(i-c1)
+
+;         mov rbx, 0
+;         mov rbx, r11
+;         sub rbx, r9     ;(c2-c1)
+
+;         mov rdx, 0      ; 0 utilizado en la division para evitar error
+;         mov rax, rcx    ; (i-c1)
+;         div rbx         ; rax/(c2-c1)
+;         mov rbx, rax    ; ((i-c1)/(c2-c1))
+
+;         mov rax, r12
+;         mul rbx         ; ((i-c1)/(c2-c1))*vc2
+
+;         pop rax
+
+;         mov r15, 0
+;         add r15, rbx
+;         add r15, rax
+
+
+;         pop r12
+;         pop r11
+;         pop r10
+;         pop r9
+;         pop r8
+;         pop rdx
+;         pop rcx
+;         pop rbx
+;         pop rax
+
+        ret
 
 _end:
 
