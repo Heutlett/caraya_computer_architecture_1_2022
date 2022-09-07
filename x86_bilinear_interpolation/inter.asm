@@ -12,6 +12,24 @@ O_RDONLY    equ 0
 
 SYS_EXIT    equ 60
 
+;       Instruccion para imprimir un salto de linea:
+;       print_console new_line,1 
+
+;       Calcula %1 mod %2 y lo guarda en rdx
+%macro modulo 2         
+        mov rdx, 0  
+        div %2     
+        mov %1, rdx 
+%endmacro 
+
+%macro print_console 2
+        mov rax, SYS_WRITE
+        mov rdi, STDOUT
+        mov rsi, %1             ; Se imprime el parametro %1
+        mov rdx, %2             ; Size = parametro %2
+        syscall
+%endmacro
+
 section .data
         filename        db  "imagen.txt",0
 
@@ -150,27 +168,16 @@ _printLoop:
         mov cl, [rax]
         cmp cl, 0
         jne _printLoop
+         
+        pop rsi                 
+        print_console rsi,rbx   ; Imprime rsi de tamano rbx
 
-        mov rax, SYS_WRITE
-        mov rdi, STDOUT
-        pop rsi             ; Se imprime el contenido de rsi
-        mov rdx, rbx
-        syscall
 
-        call _print_new_line
-        call _print_new_line
+        print_console new_line,1
+        print_console new_line,1
 
         ret
 
-_print_new_line:
-
-        mov rax, SYS_WRITE
-        mov rdi, STDOUT
-        mov rsi, new_line   ; Se imprime un salto de linea
-        mov rdx, 1          ; Size
-        syscall
-
-        ret
 
 ; inputs:   rax=array
 _printNums:
@@ -196,8 +203,8 @@ _printNumsLoop:
 
 _printNumsEnd:
 
-        call _print_new_line
-        call _print_new_line
+        print_console new_line,1
+        print_console new_line,1
 
         ret 
 
@@ -227,11 +234,7 @@ _printRAXLoop:
 _printRAXLoop2:
         mov rcx, [digitSpacePos]
 
-        mov rax, SYS_WRITE
-        mov rdi, STDOUT
-        mov rsi, rcx        ; Se imprime el contenido de rsi
-        mov rdx, 1
-        syscall
+        print_console rcx, 1
 
         mov rcx, [digitSpacePos]
         dec rcx
@@ -267,6 +270,23 @@ _interpolation:
 
         mov rax, msg3
         call _print
+
+
+_init_matrix:
+
+        mov rax, 7
+        mov rbx, 3
+
+        modulo rax, rbx
+
+        mov rax, rdx
+
+        call _printRAX
+
+        jmp _end
+
+
+
 
 _end:
 
