@@ -602,8 +602,6 @@ _put_new_value_3:
 
         pop rax
 
-
-
         call _calc_interpolation
 
 
@@ -623,7 +621,7 @@ _calc_interpolation:
         push rbx
         push rcx
         push rdx
-        push 8
+        push r8
         push r9
         push r10
         push r11
@@ -649,22 +647,21 @@ _prueba1:
         mov rbx, 0
         mov rbx, r11
         sub rbx, r9     ;(c2-c1)        bien
-_prueba2:
 
-        ; mov rdx, 0
-        ; mov rax, 100
-        ; mov rcx, 10
-        ; div rcx
+        ; (c2-i)*vc1
+
+        mov rax, r10    ; (vc1)
+        mul rcx         
+        mov rcx, rax    ; (c2-i)*vc1
+
+prueba:
 
         mov rdx, 0      ; 0 utilizado en la division para evitar error
-        mov rax, rcx    ; (c2-i)
+        mov rax, rcx    ; (c2-i)*vc1
         div rbx         ; rax/(c2-c1)
         mov rbx, rax    ; ((c2-i)/(c2-c1))
 
 _prueba3:
-
-        mov rax, r10
-        mul rbx         ; ((c2-i)/(c2-c1))*vc1
 
         push rbx
 
@@ -679,15 +676,22 @@ _prueba4:
         mov rbx, r11
         sub rbx, r9     ;(c2-c1)
 
+        ; (i-c1)*vc2
+        mov rax, r12    ; (vc2)
+        mul rcx         
+        mov rcx, rax    ; (i-c1)*vc2
+
+
+
         mov rdx, 0      ; 0 utilizado en la division para evitar error
-        mov rax, rcx    ; (i-c1)
+        mov rax, rcx    ; (i-c1)*vc2
         div rbx         ; rax/(c2-c1)
+
         mov rbx, rax    ; ((i-c1)/(c2-c1))
-
-        mov rax, r12
-        mul rbx         ; ((i-c1)/(c2-c1))*vc2
-
         pop rax
+
+
+final2:
 
         mov r15, 0
         add r15, rbx
