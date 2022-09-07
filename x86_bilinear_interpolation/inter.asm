@@ -10,9 +10,7 @@ SYS_WRITE   equ 1
 
 O_RDONLY    equ 0
 
-
-
-
+SYS_EXIT    equ 60
 
 section .data
         filename        db  "imagen.txt",0
@@ -33,7 +31,7 @@ section .data
 section .bss
         text            resb    100         ; Contenido del texto leido del archivo
 
-        digitSpace      resb    100         ; Variables usadas para 
+        digitSpace      resb    100         ; Variables usadas para leer numeros enteros
 	    digitSpacePos   resb    8
 
         array           resb    100         ; Arreglo de elementos de la imagen
@@ -170,21 +168,18 @@ _print_new_line:
         ret
 
 ; inputs:   rax=array
-
 _printNums:
 
-        mov r8, ARRAY_SIZE       ; IMPORTANTE: VALOR DE N
-        mov r9, 0
-        mov r10, rax
-        mov r15, 0xff   ; Mascara
+        mov r9, 0           ; Contador
+        mov r10, rax        ; Puntero de array
 
 _printNumsLoop:
 
-        cmp r9, r8
+        cmp r9, ARRAY_SIZE  ; Si contador == ARRAY_SIZE
         je  _printNumsEnd
 
         mov rax, [r10]
-        and rax, r15
+        and rax, MASK
 
         call _printRAX
 
@@ -201,10 +196,9 @@ _printNumsEnd:
 
         ret 
 
-
 _printRAX:
-        mov rcx, digitSpace
-        mov rbx, 32
+        mov rcx, digitSpace         
+        mov rbx, 32                 ; Se pone imprime al final un espacio como separador
         mov [rcx], rbx
         inc rcx
         mov [digitSpacePos], rcx
@@ -256,7 +250,7 @@ _end:
 
         ; Termina el programa
 
-        mov rax, 60
+        mov rax, SYS_EXIT
         mov rdi, 0
         syscall
 

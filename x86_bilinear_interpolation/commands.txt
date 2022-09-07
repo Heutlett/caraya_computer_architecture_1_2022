@@ -7,41 +7,13 @@ r
 p /x (char[11])text
 
 
-nasm -felf64 -o read_file_dec.o read_file_dec.asm
-ld -o read_file_dec read_file_dec.o
-gdb read_file_dec
+nasm -felf64 -o inter.o inter.asm
+ld -o inter inter.o
+./inter
 
-
-
-nasm -felf64 -o read_file_final.o read_file_final.asm
-ld -o read_file_final read_file_final.o
-gdb read_file_final
+gdb inter
 
 b _end
 r
 p /x (char[15])text
-
-nasm -felf64 -o div.o div.asm
-ld -o div div.o
-gdb div
-
-nasm -felf64 -o mul.o mul.asm
-ld -o mul mul.o
-gdb mul
-
-
-nasm -felf64 -o print.o print.asm
-ld -o print print.o
-gdb mul
-
-
-nasm -felf64 -o print_ints.o print_ints.asm
-ld -o print_ints print_ints.o
-gdb mul
-
-
-nasm -felf64 -o arreglo.o arreglo.asm
-ld -o arreglo arreglo.o
-gdb mul
-
 p /d (char[15])array
