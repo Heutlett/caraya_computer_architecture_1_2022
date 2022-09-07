@@ -237,8 +237,9 @@ _printRAXLoop2:
 
         ret
 
-_end:
-        ; Se imprime el contenido del array
+print_array:
+
+        push rax
 
         mov rax, msg2
         call _print
@@ -246,7 +247,14 @@ _end:
         mov rax, array
         call _printNums
 
-        
+        pop rax
+
+        ret
+
+_end:
+
+        ; Se imprime el contenido del array
+        call print_array
 
         ; Termina el programa
 
