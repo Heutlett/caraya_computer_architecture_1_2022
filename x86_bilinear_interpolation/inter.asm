@@ -542,10 +542,6 @@ _new_row_horizontal:
 
 
 _horizontal_null_value:
-  
-        print_console new_line,1
-        print_console msgPrueba,6
-        print_console new_line,1
 
         mov rax, r11
         mov [c1], rax
@@ -567,8 +563,6 @@ _horizontal_null_value:
         and rax, MASK
         mov [vc2], rax
 
-_prueba2:
-
         jmp _continue_horizontal_null_value
 
 _put_new_value_1:
@@ -581,11 +575,13 @@ _put_new_value_1:
 
 _put_new_value_2:
 
-        ;print_console msgNewValue,8
+        print_console msgNewValue,8
+        print_console new_line,1
 
         mov rax, r10
 
         add rax, array_out
+
 
         push rax                ; direccion donde se guarda en el stack
 
@@ -593,9 +589,10 @@ _put_new_value_2:
 
         and rax, MASK
 
+
+
         cmp rax, 0
         je _put_new_value_3
-
 
         pop rax
 
@@ -605,7 +602,10 @@ _put_new_value_3:
 
         pop rax
 
+
+
         call _calc_interpolation
+
 
         mov [rax], r15
 
@@ -619,80 +619,91 @@ _calc_interpolation:
 ;                   vc1:        valor del conocido1
 ;                   vc2:        valor del conocido2
 
-;         push rax
-;         push rbx
-;         push rcx
-;         push rdx
-;         push 8
-;         push r9
-;         push r10
-;         push r11
-;         push r12
+        push rax
+        push rbx
+        push rcx
+        push rdx
+        push 8
+        push r9
+        push r10
+        push r11
+        push r12
 
 
-;         mov r8,r11       ; r8 = i
-;         mov r9, [c1]
-;         and r9, MASK
-;         mov r10, [vc1]
-;         and r10, MASK
-;         mov r11, [c2]
-;         and r11, MASK
-;         mov r12, [vc2]
-;         and r12, MASK
-; _prueba:
+        mov r8,r11       ; r8 = i
+        mov r9, [c1]
+        and r9, MASK
+        mov r10, [vc1]
+        and r10, MASK
+        mov r11, [c2]
+        and r11, MASK
+        mov r12, [vc2]
+        and r12, MASK
+_prueba1:
 
-;         ; ((c2-i)/(c2-c1))*vc1
-;         mov rcx, 0     ; izq
-;         mov rcx, r11
-;         sub rcx, r8     ;(c2-i)
+        ; ((c2-i)/(c2-c1))*vc1
+        mov rcx, 0     ; izq
+        mov rcx, r11
+        sub rcx, r8     ;(c2-i)         bien
 
-;         mov rbx, 0
-;         mov rbx, r11
-;         sub rbx, r9     ;(c2-c1)
+        mov rbx, 0
+        mov rbx, r11
+        sub rbx, r9     ;(c2-c1)        bien
+_prueba2:
 
-;         mov rdx, 0      ; 0 utilizado en la division para evitar error
-;         mov rax, rcx    ; (c2-i)
-;         div rbx         ; rax/(c2-c1)
-;         mov rbx, rax    ; ((c2-i)/(c2-c1))
+        ; mov rdx, 0
+        ; mov rax, 100
+        ; mov rcx, 10
+        ; div rcx
 
-;         mov rax, r10
-;         mul rbx         ; ((c2-i)/(c2-c1))*vc1
+        mov rdx, 0      ; 0 utilizado en la division para evitar error
+        mov rax, rcx    ; (c2-i)
+        div rbx         ; rax/(c2-c1)
+        mov rbx, rax    ; ((c2-i)/(c2-c1))
 
-;         push rbx
+_prueba3:
 
-;         ; ((i-c1)/(c2-c1))*vc2
-;         mov rcx, 0     ; der
-;         mov rcx, r8
-;         sub rcx, r9     ;(i-c1)
+        mov rax, r10
+        mul rbx         ; ((c2-i)/(c2-c1))*vc1
 
-;         mov rbx, 0
-;         mov rbx, r11
-;         sub rbx, r9     ;(c2-c1)
+        push rbx
 
-;         mov rdx, 0      ; 0 utilizado en la division para evitar error
-;         mov rax, rcx    ; (i-c1)
-;         div rbx         ; rax/(c2-c1)
-;         mov rbx, rax    ; ((i-c1)/(c2-c1))
+_prueba4:
 
-;         mov rax, r12
-;         mul rbx         ; ((i-c1)/(c2-c1))*vc2
+        ; ((i-c1)/(c2-c1))*vc2
+        mov rcx, 0     ; der
+        mov rcx, r8
+        sub rcx, r9     ;(i-c1)
 
-;         pop rax
+        mov rbx, 0
+        mov rbx, r11
+        sub rbx, r9     ;(c2-c1)
 
-;         mov r15, 0
-;         add r15, rbx
-;         add r15, rax
+        mov rdx, 0      ; 0 utilizado en la division para evitar error
+        mov rax, rcx    ; (i-c1)
+        div rbx         ; rax/(c2-c1)
+        mov rbx, rax    ; ((i-c1)/(c2-c1))
 
+        mov rax, r12
+        mul rbx         ; ((i-c1)/(c2-c1))*vc2
 
-;         pop r12
-;         pop r11
-;         pop r10
-;         pop r9
-;         pop r8
-;         pop rdx
-;         pop rcx
-;         pop rbx
-;         pop rax
+        pop rax
+
+        mov r15, 0
+        add r15, rbx
+        add r15, rax
+
+_prueba5:
+
+        pop r12
+        pop r11
+        pop r10
+        pop r9
+        pop r8
+        pop rdx
+        pop rcx
+        pop rbx
+        pop rax
 
         ret
 

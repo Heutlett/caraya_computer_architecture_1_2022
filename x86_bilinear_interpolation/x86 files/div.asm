@@ -3,10 +3,10 @@ section .text
 
 _start:
 
-        mov edx, 550
-        mov eax, 100
-        mov ecx, 10
-        div ecx
+        mov rdx, 0
+        mov rax, 2
+        mov rcx, 3
+        div rcx
 
 _prueba:
 

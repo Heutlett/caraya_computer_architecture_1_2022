@@ -39,7 +39,24 @@ def printerArray(array2d,n):
 #                   vc2:    valor del conocido2
 def calc_interpolation(c1,c2,i,vc1,vc2):   
 
-    result = round(((c2-i)/(c2-c1))*vc1 + ((i-c1)/(c2-c1))*vc2)
+    izq = ((c2-i)/(c2-c1))*vc1
+    der = ((i-c1)/(c2-c1))*vc2
+    r = izq + der
+
+    print("i: ",i)
+    print("c1: ",c1)
+    print("vc1: ",vc1)
+    print("c2: ",c2)
+    print("vc2: ",vc2)
+    print()
+
+    print("izq = ", izq)
+    print("der = ", der)
+    print("r = ", r)
+    print()
+    print("---------------")
+
+    result = round(r)
 
     #print("num(",i,") = ((",c2,"-",i,")/(",c2,"-",c1,"))*",vc1," + ((",i,"-",c1,")/(",c2,"-",c1,"))*",vc2,"=",result)
 
@@ -217,12 +234,12 @@ def horizontal_optimized_calc(I,last_index):
             c2 = index + 3
             vc2 = I_out2[c2-1]
 
-            print("---------------")
+            # print("---------------")
 
-            print("c1: ", c1)
-            print("c2: ", c2)
-            print("vc1: ", vc1)
-            print("vc2: ", vc2)
+            # print("c1: ", c1)
+            # print("c2: ", c2)
+            # print("vc1: ", vc1)
+            # print("vc2: ", vc2)
             
         
 
