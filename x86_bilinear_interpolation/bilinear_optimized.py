@@ -208,8 +208,6 @@ def horizontal_optimized_calc(I,last_index):
 
     index = 1
 
-    I_out2 = I
-
     for c in range(len(I_out2)-1):
         
         if(col_out%3==0 and row_out%3==0):

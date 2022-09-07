@@ -51,26 +51,11 @@ SYS_EXIT    equ 60
 
 %endmacro
 
-;       Calcula %1 mod %2 y lo guarda en rdx
+;       ; Calcula rax mod rbx, y lo guarda en rax
 %macro modulo 0
-
-       ; calcs eax mod ebx, returns eax
-        mov rdx, 0  ; clear higher 32-bits as edx:eax / ebx is calced
+        mov rdx, 0  
         div rbx     
-        mov rax, rdx ; the remainder was stored in edx    
-
-        ; push rax
-        ; push rbx
-
-        ; mov rax, %1     
-        ; mov rbx, %2    
-        
-        ; mov rdx, 0  
-        ; div rbx     
-        ; mov rdx, rax
-
-        ; pop rbx
-        ; pop rax
+        mov rax, rdx
 %endmacro 
 
 %macro print_console 2
@@ -90,6 +75,7 @@ section .data
         msg1            db  "---------------------      Procesando archivo      ---------------------",10,10,"Contenido del archivo:",0
         msg2            db  "Contenido de la matriz inicial:",0
         msg3            db  "--------------------   Creando matriz resultante   ---------------------",0
+        msg4            db  "Matriz resultante con valores conocidos:",0
 
         new_line        db "",  10          ; Valor de una nueva linea para imprimir
         tab             db "",9
@@ -334,6 +320,9 @@ _interpolation:
         mov rax, msg3
         call _print
 
+        mov rax, msg4
+        call _print
+
 
 _init_matrix:
 
@@ -350,37 +339,33 @@ _init_matrix:
 _init_matrix_loop:
 
         cmp r9, ARRAY_OUT_SIZE
-        je      _end
+        je      _horizontal_calc
 
 
         mov rax,[rcx]
         and rax, MASK
 
 
-        ; calcs eax mod ebx, returns eax
+        ; Calcula el mod de las filas y columnas
         push rax
         push rbx
         push rdx
 
         mov rax, r11
         mov rbx, 3
-        modulo 
-        mov r13,rax             ; columna mod3
+        modulo          ; columna mod3
+        mov r13,rax     
 
         mov rax, r12
         mov rbx, 3
 
-        modulo           ; fila mod3
-        mov r14, rax
-
+        modulo          ; fila mod3
+        add r13, rax
 
         pop rdx
         pop rbx
         pop rax
         
-
-        add r13,r14
-
         cmp r13, 0              ; if(col_out%3==0 and row_out%3==0):
         je      _known_value    ; Coloca en la matriz inicial un valor conocido
         jne     _null_value
@@ -445,18 +430,61 @@ _null_value:
         call _printRAX
         pop_registers
 
+        pop rax
+
         print_console tab,1
 
         jmp _continue_columns
 
+_horizontal_calc:
 
-; mov rax, 7
-; mov rbx, 3
+        mov rbx, array_out
 
-; modulo rax, rbx
-; mov rax, [mod_result]
-; call _printRAX
+        mov r8, 0       ; col_out
+        mov r9, 0       ; row_out
 
+        mov r10, 0      ; indexArray = c
+        mov r11, 1      ; indexCALC
+
+        mov r12, ROW_SIZE_OUT   ; last_index_out
+        sub r12, 1
+
+_horizontal_calc_loop:
+
+
+        cmp r10, ARRAY_OUT_SIZE
+        je      _end
+
+        push rax
+        mov rax, r10
+
+        push_registers
+        call _printRAX
+        pop_registers
+
+        pop rax
+
+
+        cmp r8, r12            ; if (col_out == last_index_out)
+        je      _new_row_horizontal        ; nueva fila
+
+_continue_new_row_horizontal:
+
+        inc r8          ; col_out = col_out + 1
+        inc r10         ; c
+        inc r11         ; indexCALC = indexCALC + 1
+
+
+        jmp _horizontal_calc_loop
+
+_new_row_horizontal:
+
+        print_console new_line,1
+
+        mov r8, -1              ; col_out = -1
+        inc r9                  ; row_out = row_out +1
+
+        jmp _continue_new_row_horizontal
 
 _end:
 
@@ -467,5 +495,3 @@ _end:
         mov rax, SYS_EXIT
         mov rdi, 0
         syscall
-
-
