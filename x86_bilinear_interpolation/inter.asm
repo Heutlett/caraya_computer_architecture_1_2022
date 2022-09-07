@@ -15,8 +15,10 @@ SYS_EXIT    equ 60
 section .data
         filename        db  "imagen.txt",0
 
-        msg1            db  "Contenido del archivo:",0
-        msg2            db  "Contenido de la matriz resultante:",0
+        msgDIV          db  "------------------------------------------------------------------------",0
+        msg1            db  "---------------------      Procesando archivo      ---------------------",10,10,"Contenido del archivo:",0
+        msg2            db  "Contenido de la matriz inicial:",0
+        msg3            db  "--------------------   Creando matriz resultante   ---------------------",0
 
         new_line        db "",  10          ; Valor de una nueva linea para imprimir
 
@@ -65,6 +67,9 @@ _start:
         syscall
 
         ; Imprime el texto que se ha leido
+
+        mov rax, msgDIV
+        call _print
 
         mov rax, msg1
         call _print
@@ -128,7 +133,7 @@ _space:
         mov r11, 0          ; Resetea el numero actual
 
         cmp rcx, ASCII_END  ; Si encuentra el fin
-        je _end
+        je _interpolation
 
         jmp _convert_ascii_dec_loop
 
@@ -251,10 +256,21 @@ print_array:
 
         ret
 
-_end:
+
+_interpolation:
 
         ; Se imprime el contenido del array
         call print_array
+
+        mov rax, msgDIV
+        call _print
+
+        mov rax, msg3
+        call _print
+
+_end:
+
+
 
         ; Termina el programa
 
