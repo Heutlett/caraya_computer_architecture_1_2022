@@ -15,11 +15,39 @@ SYS_EXIT    equ 60
 ;       Instruccion para imprimir un salto de linea:
 ;       print_console new_line,1 
 
+%macro push_registers 0
+        push rbx        ; rbx
+        push rcx        ; rcx
+        push rdx        ; rdx
+        push r8         ; r8
+        push r9         ; r9
+        push r10        ; r8
+        push r11        ; r9
+        push r12        ; r8
+        push r13        ; r9
+        push r14        ; r8
+        push r15        ; r9
+%endmacro
+
+%macro pop_registers 0
+        pop r15        ; r9
+        pop r14        ; r8
+        pop r13        ; r9
+        pop r12        ; r8
+        pop r11        ; r9
+        pop r10        ; r8
+        pop r9         ; r9
+        pop r8         ; r8
+        pop rdx        ; rdx
+        pop rcx        ; rcx
+        pop rbx        ; rbx        
+%endmacro
+
 ;       Calcula %1 mod %2 y lo guarda en rdx
 %macro modulo 2         
         mov rdx, 0  
         div %2     
-        mov %1, rdx 
+        mov [mod_result], rdx 
 %endmacro 
 
 %macro print_console 2
@@ -42,19 +70,27 @@ section .data
 
         ; ------------------- CONSTANTES -----------------------------------------
         
-        %assign FILE_SIZE   15
-        %assign MASK        0xff
-        %assign ARRAY_SIZE  4
-        %assign ASCII_SPACE -16
-        %assign ASCII_END   -48
+        %assign FILE_SIZE       15
+        %assign ARRAY_SIZE      4
+        %assign ARRAY_OUT_SIZE  16
+        %assign ROW_SIZE        2
+
+        %assign MASK            0xff
+        %assign ASCII_SPACE     -16
+        %assign ASCII_END       -48
+        
 
 section .bss
         text            resb    100         ; Contenido del texto leido del archivo
 
         digitSpace      resb    100         ; Variables usadas para leer numeros enteros
-	    digitSpacePos   resb    8
+        digitSpacePos   resb    8
 
         array           resb    100         ; Arreglo de elementos de la imagen
+
+        array_out       resb    16
+
+        mod_result      resb    1
 
 section .text
         global _start
@@ -255,6 +291,9 @@ print_array:
         mov rax, array
         call _printNums
 
+        mov rax, array_out
+        call _printNums
+
         pop rax
 
         ret
@@ -274,18 +313,38 @@ _interpolation:
 
 _init_matrix:
 
-        mov rax, 7
-        mov rbx, 3
+        mov rbx, array
+        mov rcx, array_out
+        mov r8, 0       ; Index0 = Contador
+        mov r9, 1       ; IndexCalc
 
-        modulo rax, rbx
 
-        mov rax, rdx
+_init_matrix_loop:
 
+        cmp r8, ARRAY_OUT_SIZE
+        je      _end
+
+
+        mov rax,[rbx]
+        and rax, MASK
+_prueba:
+        push_registers
         call _printRAX
+        pop_registers
 
-        jmp _end
+        inc rbx
+        inc r8
+        inc r9
+
+        jmp _init_matrix_loop
 
 
+; mov rax, 7
+; mov rbx, 3
+
+; modulo rax, rbx
+; mov rax, [mod_result]
+; call _printRAX
 
 
 _end:
