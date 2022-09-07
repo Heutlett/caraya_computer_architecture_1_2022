@@ -41,7 +41,7 @@ def calc_interpolation(c1,c2,i,vc1,vc2):
 
     result = round(((c2-i)/(c2-c1))*vc1 + ((i-c1)/(c2-c1))*vc2)
 
-    print("num(",i,") = ((",c2,"-",i,")/(",c2,"-",c1,"))*",vc1," + ((",i,"-",c1,")/(",c2,"-",c1,"))*",vc2,"=",result)
+    #print("num(",i,") = ((",c2,"-",i,")/(",c2,"-",c1,"))*",vc1," + ((",i,"-",c1,")/(",c2,"-",c1,"))*",vc2,"=",result)
 
     return result
 
@@ -151,38 +151,6 @@ def bilinear_interpolation(I):
 
     return I_out
 
-def bilinear_optimized(I, n_src):
-
-    index = 0
-    last_index = n_src-1
-    print("last_index_src: ", last_index)
-
-    row = 0
-
-
-    tamano = (last_index*3+1)*(last_index*3+1)    # El final debería ser de 292x292
-    print("size of I2_out: ", tamano)
-    print()
-
-    I_out2 = np.zeros(tamano)
-
-    for c in range(len(I)):  #   c: corresponde al indice de cada valor conocido de l matriz original
-
-        if(index == last_index):
-            pass
-        else:
-            pass
-
-        if (index == last_index):   # Se encarga de analizar cuando pasar a una siguiente fila
-            index = 0
-            row = row + 1
-        else:
-            index = index + 1
-
-    
-
-    return I_out2
-
 # Genera la matriz inicial con el tamano final y los valores conocidos colocados, los no conocidos se ponen -1
 
 def fill_null_values(I):
@@ -202,7 +170,6 @@ def generate_initial_Iout(I, n_src):
 
     tamano = (last_index_src*3+1)*(last_index_src*3+1)    # El final debería ser de 292x292
     print("size of I2_out: ", tamano)
-    print()
 
     I_out2 = np.zeros(tamano)
     I_out2 = fill_null_values(I_out2)
@@ -246,8 +213,6 @@ def horizontal_optimized_calc(I,last_index):
     for c in range(len(I_out2)-1):
         
         if(col_out%3==0 and row_out%3==0):
-
-            print(index)
 
             c1 = index 
             c2 = index + 3
@@ -347,33 +312,25 @@ def test_algorithm():
 
 #I_out = bilinear_interpolation(I)
 
-#I_2 = np.array([10,20,30,40])
-#n_src = 2
+
+
+# I_2 = np.array([10,20,30,40])
+# n_src = 2
 
 I_2 = np.array([10,20,30,40,30,40,50,60,50,60,70,80,70,80,90,0])
 n_src = 4
 
-
-nm_src = n_src*n_src
-
 I_out2 = generate_initial_Iout(I_2,n_src)
 
-last_index_src = n_src-1
-tamano = last_index_src*3+1
+row_size_src = n_src-1
+row_size_out = row_size_src*3+1
 
-#I_out2 = bilinear_optimized(I_2,n_src)
+
+I_out2 = interpolation_optimized(I_out2,row_size_out)
 
 print("\nI2:")
-printerArray(I_2,4)
+printerArray(I_2,n_src)
 print("\nI_out:")
-printerArray(I_out2,tamano)
-
-
-n_src = 10
-nm_src = n_src*n_src
-
-I_out2 = interpolation_optimized(I_out2,n_src)
-
-printerArray(I_out2,10)
+printerArray(I_out2,row_size_out)
 
 #test_algorithm()
