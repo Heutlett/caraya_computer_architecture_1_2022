@@ -231,15 +231,8 @@ def generate_initial_Iout(I, n_src):
         
     return I_out2
 
-def interpolation_optimized(I, n_src):
 
-    tamano = n_src*n_src
-    print("Size of IOUT: ", tamano)
-
-    last_index = n_src-1
-    print("Last Index: ", last_index)
-    
-    print()
+def horizontal_optimized_calc(I,last_index):
 
     I_out2 = I
 
@@ -248,6 +241,7 @@ def interpolation_optimized(I, n_src):
 
     index = 1
 
+    I_out2 = I
 
     for c in range(len(I_out2)-1):
         
@@ -277,6 +271,20 @@ def interpolation_optimized(I, n_src):
 
         col_out = col_out + 1
 
+        
+    return I_out2
+
+def interpolation_optimized(I, n_src):
+
+    tamano = n_src*n_src
+    print("Size of IOUT: ", tamano)
+
+    last_index = n_src-1
+    print("Last Index: ", last_index)
+    
+    print()
+
+    I_out2 = horizontal_optimized_calc(I, last_index)
         
     return I_out2
 
