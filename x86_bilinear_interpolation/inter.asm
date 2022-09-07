@@ -1,4 +1,4 @@
-; Read txt file and save into text array
+; Read txt file and save into text array_src
 
 STDOUT      equ 1
 
@@ -44,18 +44,28 @@ SYS_EXIT    equ 60
 %endmacro
 
 ;       Calcula %1 mod %2 y lo guarda en rdx
-%macro modulo 2         
+%macro modulo 2
+        push rax
+        push rbx
+
+        mov rax, %1     
+        mov rbx, %2    
         mov rdx, 0  
-        div %2     
-        mov [mod_result], rdx 
+        div rbx     
+        mov rdx, rax
+
+        pop rbx
+        pop rax
 %endmacro 
 
 %macro print_console 2
+        push_registers
         mov rax, SYS_WRITE
         mov rdi, STDOUT
         mov rsi, %1             ; Se imprime el parametro %1
         mov rdx, %2             ; Size = parametro %2
         syscall
+        pop_registers
 %endmacro
 
 section .data
@@ -71,9 +81,10 @@ section .data
         ; ------------------- CONSTANTES -----------------------------------------
         
         %assign FILE_SIZE       15
-        %assign ARRAY_SIZE      4
+        %assign ARRAY_SRC_SIZE      4
         %assign ARRAY_OUT_SIZE  16
-        %assign ROW_SIZE        2
+        %assign ROW_SIZE_SRC    2
+        %assign ROW_SIZE_OUT    4
 
         %assign MASK            0xff
         %assign ASCII_SPACE     -16
@@ -86,7 +97,7 @@ section .bss
         digitSpace      resb    100         ; Variables usadas para leer numeros enteros
         digitSpacePos   resb    8
 
-        array           resb    100         ; Arreglo de elementos de la imagen
+        array_src       resb    100         ; Arreglo de elementos de la imagen
 
         array_out       resb    16
 
@@ -134,7 +145,7 @@ _start:
 ;   Convierte el contenido del archivo txt de formato ascii a un arreglo de enteros
 _convert_ascii_dec:
 
-        mov r12, array  ; Puntero array
+        mov r12, array_src  ; Puntero array_src
         mov rbx, text   ; Puntero txt
 
         mov r9, 100     ; Multiplicador
@@ -180,8 +191,8 @@ _convert_ascii_dec_loop:
 
 _space:
 
-        mov [r12], r11      ; Guarda en la posicion r12 del array el valor de r11
-        inc r12             ; Se mueve el puntero del array
+        mov [r12], r11      ; Guarda en la posicion r12 del array_src el valor de r11
+        inc r12             ; Se mueve el puntero del array_src
 
         mov r9, 100         ; Resetea el multiplicador
         mov r11, 0          ; Resetea el numero actual
@@ -215,15 +226,15 @@ _printLoop:
         ret
 
 
-; inputs:   rax=array
+; inputs:   rax=array_src
 _printNums:
 
         mov r9, 0           ; Contador
-        mov r10, rax        ; Puntero de array
+        mov r10, rax        ; Puntero de array_src
 
 _printNumsLoop:
 
-        cmp r9, ARRAY_SIZE  ; Si contador == ARRAY_SIZE
+        cmp r9, ARRAY_SRC_SIZE  ; Si contador == ARRAY_SRC_SIZE
         je  _printNumsEnd
 
         mov rax, [r10]
@@ -288,10 +299,7 @@ print_array:
         mov rax, msg2
         call _print
 
-        mov rax, array
-        call _printNums
-
-        mov rax, array_out
+        mov rax, array_src
         call _printNums
 
         pop rax
@@ -299,9 +307,10 @@ print_array:
         ret
 
 
+
 _interpolation:
 
-        ; Se imprime el contenido del array
+        ; Se imprime el contenido del array_src
         call print_array
 
         mov rax, msgDIV
@@ -313,10 +322,14 @@ _interpolation:
 
 _init_matrix:
 
-        mov rbx, array
-        mov rcx, array_out
-        mov r8, 0       ; Index0 = Contador
-        mov r9, 1       ; IndexCalc
+        mov rbx, array_src      ; Puntero array_src
+        mov rcx, array_out      ; Puntero array_out
+        mov r8, 0               ; index_out = c      
+        mov r9, 0               ; index_src
+        mov r10, ROW_SIZE_OUT   ; last_index_out
+        sub r10, 1
+        mov r11, 0              ; col_out
+        mov r12, 0              ; row_out
 
 
 _init_matrix_loop:
@@ -325,19 +338,43 @@ _init_matrix_loop:
         je      _end
 
 
-        mov rax,[rbx]
+        mov rax,[rcx]
         and rax, MASK
-_prueba:
+
         push_registers
         call _printRAX
         pop_registers
 
-        inc rbx
+
+        modulo r11, 3
+        mov r13,rdx             ; columna mod3
+
+        modulo r12, 3           ; fila mod3
+        mov r14,rdx
+
+
+        cmp r11, r10            ; if (col_out == last_index_out)
+        je _new_row      ; nueva fila
+
+_continue_new_row:
+
+        inc r11
+
+
+
+        inc rcx
         inc r8
         inc r9
 
         jmp _init_matrix_loop
 
+_new_row:
+
+        print_console new_line,1
+
+        mov r11, -1              ; col_out = 0
+
+        jmp _continue_new_row
 
 ; mov rax, 7
 ; mov rbx, 3
