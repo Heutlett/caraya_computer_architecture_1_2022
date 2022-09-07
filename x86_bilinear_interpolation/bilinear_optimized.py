@@ -314,11 +314,11 @@ def test_algorithm():
 
 
 
-# I_2 = np.array([10,20,30,40])
-# n_src = 2
+I_2 = np.array([10,20,30,40])
+n_src = 2                           # Esto se lo voy a pasar al compilador yo mismo como argumento de linea de comandos
 
-I_2 = np.array([10,20,30,40,30,40,50,60,50,60,70,80,70,80,90,0])
-n_src = 4
+#I_2 = np.array([10,20,30,40,30,40,50,60,50,60,70,80,70,80,90,0])
+#n_src = 4
 
 I_out2 = generate_initial_Iout(I_2,n_src)
 
