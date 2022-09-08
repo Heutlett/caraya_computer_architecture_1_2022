@@ -23,6 +23,17 @@ SYS_EXIT    equ 60
 
 %endmacro 
 
+%macro print_array_out 0
+
+        push_registers
+        mov rax, array_out
+        mov rbx, ARRAY_OUT_SIZE
+        mov rcx, ROW_SIZE_OUT
+        call _print_array
+        pop_registers
+
+%endmacro
+
 %macro push_registers 0
         push rbx        ; rbx
         push rcx        ; rcx
@@ -64,7 +75,8 @@ SYS_EXIT    equ 60
         mov rdx, 0  
         div rbx     
         mov rax, rdx
-%endmacro 
+%endmacro       
+
 
 %macro print_console 2
         push_registers
@@ -83,7 +95,8 @@ section .data
         msg1            db  "---------------------      Procesando archivo      ---------------------",10,10,"Contenido del archivo:",0
         msg2            db  "Contenido de la matriz inicial:",0
         msg3            db  "--------------------   Creando matriz resultante   ---------------------",0
-        msg4            db  "Matriz resultante con valores conocidos:",0
+        msg4            db  "Valores conocidos:",0
+        msg5            db  "Valores horizontales:",0
         msgCol          db  "col_out: ",0
         msgRow          db  "row_out: ",0
         msgC1           db  "c1: ",0
@@ -100,12 +113,13 @@ section .data
         tab             db "",9
         ; ------------------- CONSTANTES -----------------------------------------
         
-        %assign FILE_SIZE       15
-        %assign ARRAY_SRC_SIZE      4
-        %assign ARRAY_OUT_SIZE  16
-        %assign ARRAY_OUT_SIZE_1  15
-        %assign ROW_SIZE_SRC    2
-        %assign ROW_SIZE_OUT    4
+        %assign FILE_SIZE               15
+        %assign ARRAY_SRC_SIZE          4
+        %assign ARRAY_OUT_SIZE          16
+        %assign ARRAY_OUT_SIZE_1        15
+        %assign ROW_SIZE_SRC            2
+        %assign ROW_SIZE_OUT            4
+        
 
         %assign MASK            0xff
         %assign ASCII_SPACE     -16
@@ -218,7 +232,9 @@ _convert_ascii_dec_loop:
 _space:
 
         mov [r12], r11      ; Guarda en la posicion r12 del array_src el valor de r11
-        inc r12             ; Se mueve el puntero del array_src
+
+        add r12, 4
+        ;inc r12             ; Se mueve el puntero del array_src
 
         mov r9, 100         ; Resetea el multiplicador
         mov r11, 0          ; Resetea el numero actual
@@ -252,31 +268,65 @@ _printLoop:
         ret
 
 
-; inputs:   rax=array_src
-_printNums:
+
+_print_array:    ; rax = array,   rbx = size,   rcx = row_size
+
+        push r9
+        push r10
+        push r11
 
         mov r9, 0           ; Contador
-        mov r10, rax        ; Puntero de array_src
+        mov r10, rax        ; Puntero de array
 
-_printNumsLoop:
+_print_array_Loop:
 
-        cmp r9, ARRAY_SRC_SIZE  ; Si contador == ARRAY_SRC_SIZE
-        je  _printNumsEnd
+        cmp r9, rbx  ; Si contador == ARRAY_SRC_SIZE
+        je  _print_array_end
 
         mov rax, [r10]
         and rax, MASK
 
+        push_registers
         call _printRAX
+        pop_registers
 
-        inc r10
+        print_console tab,1
+
+        add r10,4
 
         add r9,1
 
-        jmp _printNumsLoop
+        push rax
+        push rbx
+        
 
-_printNumsEnd:
+        mov rax, r9
+        mov rbx, rcx
+        modulo          
+
+        cmp rax, 0
+        je _print_new_row
+
+_continue_print:
+
+
+        pop rbx
+        pop rax
+
+        jmp _print_array_Loop
+
+_print_new_row:
 
         print_console new_line,1
+
+        jmp _continue_print
+
+_print_array_end:
+
+        pop r11
+        pop r10
+        pop r9
+
         print_console new_line,1
 
         ret 
@@ -318,26 +368,19 @@ _printRAXLoop2:
 
         ret
 
-print_array:
-
-        push rax
-
-        mov rax, msg2
-        call _print
-
-        mov rax, array_src
-        call _printNums
-
-        pop rax
-
-        ret
-
 
 
 _interpolation:
 
         ; Se imprime el contenido del array_src
-        call print_array
+        print_console msg2, 31
+        print_console new_line,1
+        print_console new_line,1
+
+        mov rax, array_src
+        mov rbx, ARRAY_SRC_SIZE
+        mov rcx, ROW_SIZE_SRC
+        call _print_array
 
         mov rax, msgDIV
         call _print
@@ -425,7 +468,10 @@ _known_value:
         push rax
         push rdx
 
-        add rbx, r8     ; addressing
+        mov rdx, r8
+        shl rdx, 2
+
+        add rbx, rdx     ; addressing
 
         mov rdx, r9
         shl rdx, 2
@@ -588,9 +634,6 @@ _put_new_value_1:
 
 _put_new_value_2:
 
-        print_console msgNewValue,8
-        print_console new_line,1
-
         mov rax, r10
 
         shl rax, 2
@@ -705,7 +748,10 @@ _calc_interpolation:
 
 _end:
 
-
+        mov rax, msg5
+        call _print
+        
+        print_array_out
 
         ; Termina el programa
 
