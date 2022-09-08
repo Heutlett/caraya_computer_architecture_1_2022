@@ -43,22 +43,22 @@ def calc_interpolation(c1,c2,i,vc1,vc2):
     der = ((i-c1)/(c2-c1))*vc2
     r = izq + der
 
-    print("i: ",i)
-    print("c1: ",c1)
-    print("vc1: ",vc1)
-    print("c2: ",c2)
-    print("vc2: ",vc2)  
-    print()
+    # print("i: ",i)
+    # print("c1: ",c1)
+    # print("vc1: ",vc1)
+    # print("c2: ",c2)
+    # print("vc2: ",vc2)  
+    # print()
 
-    print("izq = ", izq)
-    print("der = ", der)
-    print("r = ", r)
-    print()
-    print("---------------")
+    # print("izq = ", izq)
+    # print("der = ", der)
+    # print("r = ", r)
+    # print()
+    # print("---------------")
 
     result = round(r)
 
-    #print("num(",i,") = ((",c2,"-",i,")/(",c2,"-",c1,"))*",vc1," + ((",i,"-",c1,")/(",c2,"-",c1,"))*",vc2,"=",result)
+    print("num(",i,") = ((",c2,"-",i,")/(",c2,"-",c1,"))*",vc1," + ((",i,"-",c1,")/(",c2,"-",c1,"))*",vc2,"=",result)
 
     return result
 

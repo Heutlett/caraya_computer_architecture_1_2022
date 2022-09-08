@@ -15,33 +15,33 @@ SYS_EXIT    equ 60
 ;       _________________________________________________________________________________________
 ;       Macro para hacer push de todos los registros menos RAX
 %macro push_registers 0
-        push rbx        ; rbx
-        push rcx        ; rcx
-        push rdx        ; rdx
-        push r8         ; r8
-        push r9         ; r9
-        push r10        ; r8
-        push r11        ; r9
-        push r12        ; r8
-        push r13        ; r9
-        push r14        ; r8
-        push r15        ; r9
+        push rbx        
+        push rcx        
+        push rdx        
+        push r8         
+        push r9         
+        push r10        
+        push r11       
+        push r12        
+        push r13       
+        push r14        
+        push r15      
 %endmacro
 
 ;       _________________________________________________________________________________________
 ;       Macro para hacer pop de todos los valores de registros que estan en el stack menos RAX
 %macro pop_registers 0
-        pop r15        ; r9
-        pop r14        ; r8
-        pop r13        ; r9
-        pop r12        ; r8
-        pop r11        ; r9
-        pop r10        ; r8
-        pop r9         ; r9
-        pop r8         ; r8
-        pop rdx        ; rdx
-        pop rcx        ; rcx
-        pop rbx        ; rbx        
+        pop r15        
+        pop r14        
+        pop r13        
+        pop r12       
+        pop r11      
+        pop r10       
+        pop r9         
+        pop r8         
+        pop rdx       
+        pop rcx       
+        pop rbx             
 %endmacro
 
 ;       _________________________________________________________________________________________
@@ -88,7 +88,8 @@ SYS_EXIT    equ 60
 %endmacro
 
 section .data
-        filename        db  "imagen.txt",0
+        ;filename        db  "imagen.txt",0
+        filename        db  "imagen2.txt",0
 
         msgDIV          db  "------------------------------------------------------------------------",0
         msg1            db  "---------------------      Procesando archivo      ---------------------",10,10,"Contenido del archivo:",0
@@ -113,12 +114,19 @@ section .data
 
         ; _____________________________ CONSTANTES _________________________________________
         
-        %assign FILE_SIZE               15
-        %assign MATRIX_SRC_SIZE         4
-        %assign MATRIX_OUT_SIZE         16
-        %assign ROW_SIZE_SRC            2
-        %assign ROW_SIZE_OUT            4
-        %assign LAST_INDEX_OUT          3
+        ; %assign FILE_SIZE               15
+        ; %assign MATRIX_SRC_SIZE         4
+        ; %assign MATRIX_OUT_SIZE         16
+        ; %assign ROW_SIZE_SRC            2
+        ; %assign ROW_SIZE_OUT            4
+        ; %assign LAST_INDEX_OUT          3
+
+        %assign FILE_SIZE               63
+        %assign MATRIX_SRC_SIZE         16
+        %assign MATRIX_OUT_SIZE         100
+        %assign ROW_SIZE_SRC            4
+        %assign ROW_SIZE_OUT            10
+        %assign LAST_INDEX_OUT          9
         
 
         %assign MASK            0xff
@@ -603,37 +611,37 @@ _put_new_value_1:
 _put_new_value_2:
 
         mov rax, r10            ; rax = index_out
+        shl rax, 2              ; Se alinea el indice
+        add rax, matrix_out     ; Se desplaza el puntero matrix_out a la posicion index_out
+              
+        mov rcx,rax             ; Se guarda en rcx el puntero para usarlo posteriormente
 
-        shl rax, 2
-
-        add rax, matrix_out
-
-        mov rcx, 0
-        mov rcx,rax             
-
-        mov rax, [rax]
+        mov rax, [rax]          ; rax = matrix_out[index_out]
         and rax, MASK
 
-        cmp rax, 0
-        je _put_new_value_3
+        ; Esta condicion se debe cambiar, debe ser == -1
+        cmp rax, 0              ; IF (matrix_out[index_out] == 0)
+        je _put_new_value_3     ; Si se cumple significa que es un valor desconocido que se debe calcular
 
         jmp _continue_put_new_value
 
 _put_new_value_3:
 
-        call _calc_interpolation
+        call _calc_interpolation        ; Calcula el valor desconocido y lo almacena en r15
 
-        mov [rcx], r15w
+        mov [rcx], r15w                 ; matrix_out[index_out] = r15w
+                                        ; OJO: se usa r15w porque solo se ocupa 1byte
 
         jmp _continue_put_new_value
 
+;       _________________________________________________________________________________________
+;       Calcula el valor desconocido mediante la formula de interpolacion bilineal
+;
+;       Formula: value[i] = (c2-i)*vc1/(c2-c1) + (i-c1)*vc2/(c2-c1)
+;
+;       input:          r11 = indexCALC
+;       output:         r15 = resultado
 _calc_interpolation:
-
-;   Parametros:     c1:         indice conocido1
-;                   c2:         indice conocido2
-;                   i: r8         indice numero a calcular
-;                   vc1:        valor del conocido1
-;                   vc2:        valor del conocido2
 
         push rax
         push rbx
@@ -645,8 +653,7 @@ _calc_interpolation:
         push r11
         push r12
 
-
-        mov r8,r11              ; r8 = index
+        mov r8,r11              ; r8 = indexCALC
         mov r9, [c1]
         and r9, MASK
         mov r10, [vc1]
