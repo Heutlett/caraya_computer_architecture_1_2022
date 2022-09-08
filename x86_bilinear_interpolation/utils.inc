@@ -69,7 +69,7 @@
 
 %endmacro
 ;       _________________________________________________________________________________________
-;       Actualiza las variables para el calculo horizontal
+;       Calcula y setea las variables de la formula de interpolacion para pixeles horizontales
 ;       input:  r11 = indexCALC 
 ;       output: sin salidas
 %macro calc_horizontal_interpolation_variables 0
@@ -108,6 +108,20 @@
         pop rdx
         pop rcx
         pop rbx
+
+%endmacro
+
+;       _________________________________________________________________________________________
+;       Inserta un nuevo valor a la matriz de salida
+;       input:  rcx     = index_out
+;               r15w    = int
+;       output: sin salidas
+%macro insert_new_value_into_matrix_out 0
+
+        call calc_interpolation        ; Calcula el valor desconocido y lo almacena en r15
+
+        mov [rcx], r15w                 ; matrix_out[index_out] = r15w
+                                        ; OJO: se usa r15w porque solo se ocupa 1byte
 
 %endmacro
 
@@ -328,21 +342,21 @@ _init_matrix_loop:
 _continue_columns:
 
         cmp r11, LAST_INDEX_OUT ; IF (col_out == LAST_INDEX_OUT)
-        je      _new_row        ; Se desplaza a la siguiente fila
+        je      _new_row_init        ; Se desplaza a la siguiente fila
 
-_continue_new_row:
+_continue_new_row_init_init:
 
         inc r11         ; col_out = col_out + 1
         inc r9          ; index_out = index_out + 1
 
         jmp _init_matrix_loop
 
-_new_row:
+_new_row_init:
 
         mov r11, -1     ; col_out = -1
         inc r12         ; row_out = row_out + 1
 
-        jmp _continue_new_row
+        jmp _continue_new_row_init_init
 
 ;       _________________________________________________________________________________________
 ;       Encuentra un index_out al que le corresponde un valor conocido:  

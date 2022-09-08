@@ -148,14 +148,14 @@ _continue_set_horizontal_inter_variables:
 
         ; Primera condicion requerida para que el index_out corresponda a un valor desconocido horizontal
         cmp r13, 0      ; IF (col_out % 3 == 0)         
-        jne     _put_new_value_1
+        jne     _put_new_horizontal_value_cond
 
-_continue_put_new_value:
+_continue_put_new_horizontal_value:
 
         cmp r8, LAST_INDEX_OUT          ; IF (col_out == LAST_INDEX_OUT)
-        je      _new_row_horizontal     ; Se desplaza una fila adelante
+        je      _new_row     ; Se desplaza una fila adelante
 
-_continue_new_row_horizontal:
+_continue_new_row:
 
         inc r8          ; col_out = col_out + 1
         inc r10         ; index_out = index_out + 1
@@ -163,12 +163,12 @@ _continue_new_row_horizontal:
 
         jmp _bilinear_interpolation_calc_loop
 
-_new_row_horizontal:
+_new_row:
 
         mov r8, -1      ; col_out = -1
         inc r9          ; row_out = row_out + 1
 
-        jmp _continue_new_row_horizontal
+        jmp _continue_new_row
 
 _set_horizontal_inter_variables:
 
@@ -181,14 +181,14 @@ _set_horizontal_inter_variables:
 ;       Para que el indice actual de matrix_out corresponda a un valor desconocido horizontal
 ;       se debe cumplir la siguiente condicion: IF (col_out % 3 != 0 and row_out % 3 == 0)
 ;       si se llego hasta aqui ya se cumplio la primera condicion (col_out % 3 != 0)
-_put_new_value_1:
+_put_new_horizontal_value_cond:
 
         cmp r14, 0              ; IF (row_out % 3 == 0)
-        je _put_new_value_2     ; Se cumple la segunda condicion
+        je _put_new_horizontal_value     ; Se cumple la segunda condicion
 
-        jmp _continue_put_new_value
+        jmp _continue_put_new_horizontal_value
 
-_put_new_value_2:
+_put_new_horizontal_value:
 
         mov rax, r10            ; rax = index_out
         shl rax, 2              ; Se alinea el indice
@@ -201,27 +201,28 @@ _put_new_value_2:
 
         ; Esta condicion se debe cambiar, debe ser == -1
         cmp rax, 0              ; IF (matrix_out[index_out] == 0)
-        je _put_new_value_3     ; Si se cumple significa que es un valor desconocido que se debe calcular
+        je _put_new_value     ; Si se cumple significa que es un valor desconocido que se debe calcular
 
-        jmp _continue_put_new_value
+        jmp _continue_put_new_horizontal_value
 
-_put_new_value_3:
+_put_new_value:
 
-        call calc_interpolation        ; Calcula el valor desconocido y lo almacena en r15
-
+        
 ;       ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
         print_horizontal_calc_debug2                                                    ; DEBUG
 ;       ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
 
-        mov [rcx], r15w                 ; matrix_out[index_out] = r15w
-                                        ; OJO: se usa r15w porque solo se ocupa 1byte
+        ;       Inserta un nuevo valor a matrix_out
+        ;       input: rcx  = index_out desplazado
+        ;              r15w = entero a insertar
+        insert_new_value_into_matrix_out
 
 ;       ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
         print_matrix_out                                                                ; DEBUG
         print_console new_line,1
 ;       ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
 
-        jmp _continue_put_new_value
+        jmp _continue_put_new_horizontal_value
 
 ;       _________________________________________________________________________________________
 ;                       Se inicia el calculo de los valores horizontales
