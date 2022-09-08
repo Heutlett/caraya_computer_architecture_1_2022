@@ -79,6 +79,8 @@ SYS_EXIT    equ 60
 section .data
         filename        db  "imagen.txt",0
 
+        array_out TIMES 16 dw 0         
+
         msgDIV          db  "------------------------------------------------------------------------",0
         msg1            db  "---------------------      Procesando archivo      ---------------------",10,10,"Contenido del archivo:",0
         msg2            db  "Contenido de la matriz inicial:",0
@@ -120,8 +122,8 @@ section .bss
 
         array_src       resb    100         ; Arreglo de elementos de la imagen
 
-        array_out       resb    16
-        array_out2      resb    16
+        ;array_out       resb    16
+        ;array_out2      resb    16
 
         mod_result      resb    1
 
@@ -582,43 +584,26 @@ _put_new_value_2:
 
         mov rax, r10
 
-        add rax, array_out2
-
-
-
+        add rax, array_out
 
         mov rcx, 0
-        mov rcx,rax             ; Direccion donde guardar
-pausa0:
+        mov rcx,rax             
 
         mov rax, [rax]
-
         and rax, MASK
-
-
 
         cmp rax, 0
         je _put_new_value_3
-
-        ;pop rax
 
         jmp _continue_put_new_value
 
 _put_new_value_3:
 
-        ;pop rax
-
         call _calc_interpolation
 
-_pausa1:
-        ;mov r15, -1
-        ;mov rax, [rcx]
-        ;shr rax, 8
-
-        ;add rax, r15
-
+        mov rax, [rcx]  ; Mascara 0x140000, se arregla para agregar (ii) en 0x1400ii
+        add r15, rax
         mov [rcx], r15
-_pausa2:
 
         jmp _continue_put_new_value
 
@@ -641,7 +626,7 @@ _calc_interpolation:
         push r12
 
 
-        mov r8,r11       ; r8 = i
+        mov r8,r11              ; r8 = index
         mov r9, [c1]
         and r9, MASK
         mov r10, [vc1]
@@ -650,38 +635,31 @@ _calc_interpolation:
         and r11, MASK
         mov r12, [vc2]
         and r12, MASK
-_prueba1:
 
         ; ((c2-i)/(c2-c1))*vc1
-        mov rcx, 0     ; izq
+        mov rcx, 0     
         mov rcx, r11
-        sub rcx, r8     ;(c2-i)         bien
+        sub rcx, r8     ;(c2-i)         
 
         mov rbx, 0
         mov rbx, r11
-        sub rbx, r9     ;(c2-c1)        bien
+        sub rbx, r9     ;(c2-c1)       
 
         ; (c2-i)*vc1
-
         mov rax, r10    ; (vc1)
         mul rcx         
         mov rcx, rax    ; (c2-i)*vc1
 
-prueba:
-
+        ; (c2-i)*vc1/(c2-c1)
         mov rdx, 0      ; 0 utilizado en la division para evitar error
         mov rax, rcx    ; (c2-i)*vc1
         div rbx         ; rax/(c2-c1)
         mov rbx, rax    ; ((c2-i)/(c2-c1))
 
-_prueba3:
-
-        mov r15, rbx
-
-_prueba4:
+        mov r15, rbx    ; r15 = ((c2-i)/(c2-c1))*vc1
 
         ; ((i-c1)/(c2-c1))*vc2
-        mov rcx, 0     ; der
+        mov rcx, 0      ; der
         mov rcx, r8
         sub rcx, r9     ;(i-c1)
 
@@ -694,20 +672,15 @@ _prueba4:
         mul rcx         
         mov rcx, rax    ; (i-c1)*vc2
 
-
-
+        ; (i-c1)*vc2/(c2-c1)
         mov rdx, 0      ; 0 utilizado en la division para evitar error
         mov rax, rcx    ; (i-c1)*vc2
         div rbx         ; rax/(c2-c1)
 
-        mov rbx, rax    ; ((i-c1)/(c2-c1))
+        mov rbx, rax    ; rbx = (i-c1)*vc2/(c2-c1)
 
-final2:
-
-        add r15, rax
+        add r15, rax    ; r15 = Resultado 
         and r15, MASK
-
-_prueba5:
 
         pop r12
         pop r11

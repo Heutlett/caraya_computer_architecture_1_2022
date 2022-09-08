@@ -47,7 +47,7 @@ def calc_interpolation(c1,c2,i,vc1,vc2):
     print("c1: ",c1)
     print("vc1: ",vc1)
     print("c2: ",c2)
-    print("vc2: ",vc2)
+    print("vc2: ",vc2)  
     print()
 
     print("izq = ", izq)
