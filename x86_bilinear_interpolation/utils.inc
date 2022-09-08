@@ -68,6 +68,48 @@
         mov [vc2],      %4      ; vc2   = matrix_out[c2-1]
 
 %endmacro
+;       _________________________________________________________________________________________
+;       Actualiza las variables para el calculo horizontal
+;       input:  r11 = indexCALC 
+;       output: sin salidas
+%macro calc_horizontal_interpolation_variables 0
+
+        ; r11 = indexCALC : es el mismo indice index_out pero +1
+
+        ; c1 = indexCALC                | Indice conocido 1
+        ; c2 = indexCALC + 3            | Indice conocido 2
+        ; vc1 = matrix_out[c1-1]        | Valor conocido 1
+        ; vc2 = matrix_out[c2-1]        | Valor conocido 2
+
+        push rbx
+        push rcx
+        push rdx
+
+        mov rax, r11    
+        mov rbx, rax    ; rbx = c1 = indexCALC
+
+        sub rax, 1
+        shl rax, 2
+        add rax, matrix_out            
+        mov rax, [rax]  ; rax = matrix_out[c1-1]          
+        mov rcx, rax    ; rcx = vc1 = matrix_out[c1-1]
+
+        mov rax, r11
+        add rax, 3
+        mov rdx, rax    ; rdx = c2 = indexCALC + 3
+
+        sub rax, 1      ; rax = c2 - 1
+        shl rax, 2
+        add rax, matrix_out            
+        mov rax, [rax]  ; rax = matrix_out[c2-1]        
+
+        update_interpolation_variables rbx, rcx, rdx, rax
+
+        pop rdx
+        pop rcx
+        pop rbx
+
+%endmacro
 
 ;       ⬂⬂⬂⬂⬂⬂⬂⬂⬂⬂⬂⬂⬂⬂⬂⬂⬂⬂⬂⬂⬂⬂⬂⬂⬂⬂⬂⬂⬂⬂⬂⬂⬃⬃⬃⬃⬃⬃⬃⬃⬃⬃⬃⬃⬃⬃⬃⬃⬃⬃⬃⬃⬃⬃⬃⬃⬃⬃⬃⬃⬃⬃⬃⬃
 ;       ⬄                                                                                      ⬄

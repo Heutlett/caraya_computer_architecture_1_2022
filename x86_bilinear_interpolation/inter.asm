@@ -136,17 +136,15 @@ _bilinear_interpolation_calc_loop:
         ; Guarda en r13 = col_out%3, r14 = row_out%3, r15 = col_out%3 + row_out%3
         mod_col_row r8,r9
 
-        
-
 ;       ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
         print_horizontal_calc_debug                                                     ; DEBUG
 ;       ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
 
         cmp r15, 0      ; IF (col_out % 3 == 0 and row_out % 3 == 0)
 
-        je      _horizontal_null_value
+        je      _set_horizontal_inter_variables
 
-_continue_horizontal_null_value:
+_continue_set_horizontal_inter_variables:
 
         ; Primera condicion requerida para que el index_out corresponda a un valor desconocido horizontal
         cmp r13, 0      ; IF (col_out % 3 == 0)         
@@ -172,50 +170,12 @@ _new_row_horizontal:
 
         jmp _continue_new_row_horizontal
 
-_horizontal_null_value:
+_set_horizontal_inter_variables:
 
         ; Se asignan los valores a las variables usadas en la formula de interpolacion
+        calc_horizontal_interpolation_variables
 
-        ; indexCALC : es el mismo indice index_out pero +1
-
-        ; c1 = indexCALC                | Indice conocido 1
-        ; c2 = indexCALC + 3            | Indice conocido 2
-        ; vc1 = matrix_out[c1-1]        | Valor conocido 1
-        ; vc2 = matrix_out[c2-1]        | Valor conocido 2
-
-        push rbx
-        push rcx
-        push rdx
-
-        mov rax, r11
-        and rax, MASK    
-        mov rbx, rax    ; rbx = c1 = indexCALC
-
-        sub rax, 1
-        shl rax, 2
-        add rax, matrix_out            
-        mov rax, [rax]  ; rax = matrix_out[c1-1]          
-        and rax, MASK
-        mov rcx, rax    ; rcx = vc1 = matrix_out[c1-1]
-
-        mov rax, r11
-        add rax, 3
-        and rax, MASK
-        mov rdx, rax    ; rdx = c2 = indexCALC + 3
-
-        sub rax, 1      ; rax = c2 - 1
-        shl rax, 2
-        add rax, matrix_out            
-        mov rax, [rax]  ; rax = matrix_out[c2-1]        
-        and rax, MASK
-
-        update_interpolation_variables rbx, rcx, rdx, rax
-
-        pop rdx
-        pop rcx
-        pop rbx
-
-        jmp _continue_horizontal_null_value
+        jmp _continue_set_horizontal_inter_variables
 
 ;       _________________________________________________________________________________________
 ;       Para que el indice actual de matrix_out corresponda a un valor desconocido horizontal
