@@ -115,7 +115,42 @@
         mov rdx, 0  
         div rbx     
         mov rax, rdx
-%endmacro       
+%endmacro
+;       _________________________________________________________________________________________
+;       Calcula 
+;       input:  %1 = col_out
+;               %2 = row_out
+;       output: r13 = (%1 mod 3) 
+;               r14 = (%2 mod 3) 
+;               r15 = (%1 mod 3) + (%2 mod 3) 
+%macro mod_col_row 2
+
+        ;---------------------------------------------------------
+        ; Calcula el mod de las filas y columnas
+        ;---------------------------------------------------------
+        push rax
+        push rbx
+        push rdx
+
+        mov rax, %1
+        mov rbx, 3
+        modulo          
+        mov r13,rax     ; r13 = col_out % 3
+
+        mov rax, %2
+        mov rbx, 3
+
+        modulo          
+        mov r14, rax    ; r14 = row_out % 3
+        mov r15, 0
+        add r15, r13    
+        add r15, r14    ; r15 = (col_out % 3) + (row_out % 3)
+
+        pop rdx
+        pop rbx
+        pop rax
+
+%endmacro
 
 ;       _________________________________________________________________________________________
 ;       Imprime en pantalla, %1 = string, %2 = tamano, respalda registros

@@ -112,7 +112,7 @@ _start:
 ;       _________________________________________________________________________________________
 
 ;       Calcula los valores horizontales desconocidos
-_horizontal_calc:
+_bilinear_interpolation:
 
         ;       Imprime la matriz_out con los valores conocidos
         mov rax, msg4
@@ -127,33 +127,16 @@ _horizontal_calc:
         mov r10, 0              ; index_out = c
         mov r11, 1              ; indexCALC
 
-_horizontal_calc_loop:
+_bilinear_interpolation_calc_loop:
 
         cmp r10, MATRIX_OUT_SIZE        ; IF (index_out == MATRIX_OUT_SIZE)
         je      _vertical_values        ; Finaliza el calculo de los valores horizontales    
 
         ; Calcula el mod de las filas y columnas
-        push rax
-        push rbx
-        push rdx
+        ; Guarda en r13 = col_out%3, r14 = row_out%3, r15 = col_out%3 + row_out%3
+        mod_col_row r8,r9
 
-        mov rax, r8
-        mov rbx, 3
-        modulo          
-        mov r13,rax     ; r13 = col_out % 3
-
-        mov rax, r9
-        mov rbx, 3
-
-        modulo          
-        mov r14, rax    ; r14 = row_out % 3
-        mov r15, 0
-        add r15, r13    
-        add r15, r14    ; r15 = (col_out % 3) + (row_out % 3)
-
-        pop rdx
-        pop rbx
-        pop rax
+        
 
 ;       ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
         ;print_horizontal_calc_debug                                                     ; DEBUG
@@ -180,7 +163,7 @@ _continue_new_row_horizontal:
         inc r10         ; index_out = index_out + 1
         inc r11         ; indexCALC = indexCALC + 1
 
-        jmp _horizontal_calc_loop
+        jmp _bilinear_interpolation_calc_loop
 
 _new_row_horizontal:
 
