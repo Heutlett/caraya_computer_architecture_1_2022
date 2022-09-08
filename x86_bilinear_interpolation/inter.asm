@@ -121,6 +121,7 @@ section .bss
         array_src       resb    100         ; Arreglo de elementos de la imagen
 
         array_out       resb    16
+        array_out2      resb    16
 
         mod_result      resb    1
 
@@ -484,6 +485,7 @@ _horizontal_calc_loop:
 
         mov rax, 0
         mov rax, r8
+        
 
         ; Calcula el mod de las filas y columnas
         push rax
@@ -580,10 +582,14 @@ _put_new_value_2:
 
         mov rax, r10
 
-        add rax, array_out
+        add rax, array_out2
 
 
-        push rax                ; direccion donde se guarda en el stack
+
+
+        mov rcx, 0
+        mov rcx,rax             ; Direccion donde guardar
+pausa0:
 
         mov rax, [rax]
 
@@ -594,18 +600,25 @@ _put_new_value_2:
         cmp rax, 0
         je _put_new_value_3
 
-        pop rax
+        ;pop rax
 
         jmp _continue_put_new_value
 
 _put_new_value_3:
 
-        pop rax
+        ;pop rax
 
         call _calc_interpolation
 
+_pausa1:
+        ;mov r15, -1
+        ;mov rax, [rcx]
+        ;shr rax, 8
 
-        mov [rax], r15
+        ;add rax, r15
+
+        mov [rcx], r15
+_pausa2:
 
         jmp _continue_put_new_value
 
@@ -663,7 +676,7 @@ prueba:
 
 _prueba3:
 
-        push rbx
+        mov r15, rbx
 
 _prueba4:
 
@@ -688,14 +701,11 @@ _prueba4:
         div rbx         ; rax/(c2-c1)
 
         mov rbx, rax    ; ((i-c1)/(c2-c1))
-        pop rax
-
 
 final2:
 
-        mov r15, 0
-        add r15, rbx
         add r15, rax
+        and r15, MASK
 
 _prueba5:
 
