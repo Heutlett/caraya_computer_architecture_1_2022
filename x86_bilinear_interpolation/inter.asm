@@ -12,6 +12,51 @@ O_RDONLY    equ 0
 
 SYS_EXIT    equ 60
 
+%macro print_horizontal_calc_debug 0
+        print_console msgDIV, 72
+        print_console new_line,1
+
+        print_console msgCol, 8
+        mov rax, r8
+        printRAX_push_out
+        print_console new_line,1
+
+        print_console msgRow, 8
+        mov rax, r9
+        printRAX_push_out
+        print_console new_line,1
+        print_console new_line,1
+
+        print_console msgIndex,10
+        push rax
+        mov rax, r11
+        printRAX_push_out
+        print_console new_line,1
+        print_console new_line,1
+
+        pop rax
+
+        print_matrix_out
+%endmacro
+
+%macro print_horizontal_calc_debug2 0
+        print_console msgCalcNewValue, 34
+        print_console new_line,1
+        print_console new_line,1
+        print_console msgNewValue, 10
+
+        mov rax, r15
+        printRAX_push_out
+        print_console new_line,1
+
+        print_console msgGuardaEnI, 21
+
+        mov rax, r10
+        printRAX_push_out
+        print_console new_line,1
+        print_console new_line,1
+%endmacro
+
 ;       _________________________________________________________________________________________
 ;       Macro para hacer push de todos los registros menos RAX
 %macro push_registers 0
@@ -88,9 +133,9 @@ SYS_EXIT    equ 60
 %endmacro
 
 section .data
-        filename       db  "imagen2x2.txt",0
+        ;filename       db  "imagen2x2.txt",0
         ;filename        db  "imagen3x3.txt",0
-        ;filename       db  "imagen4x4.txt",0
+        filename       db  "imagen4x4.txt",0
 
         msgDIV          db  "------------------------------------------------------------------------",0
         msg1            db  "---------------------      Procesando archivo      ---------------------",10,10,"Contenido del archivo:",0
@@ -118,12 +163,12 @@ section .data
 
         ; _____________________________ CONSTANTES _________________________________________
         
-        %assign FILE_SIZE               15
-        %assign MATRIX_SRC_SIZE         4
-        %assign MATRIX_OUT_SIZE         16
-        %assign ROW_SIZE_SRC            2
-        %assign ROW_SIZE_OUT            4
-        %assign LAST_INDEX_OUT          3
+        ; %assign FILE_SIZE               15
+        ; %assign MATRIX_SRC_SIZE         4
+        ; %assign MATRIX_OUT_SIZE         16
+        ; %assign ROW_SIZE_SRC            2
+        ; %assign ROW_SIZE_OUT            4
+        ; %assign LAST_INDEX_OUT          3
 
         ; %assign FILE_SIZE               35
         ; %assign MATRIX_SRC_SIZE         9
@@ -132,12 +177,12 @@ section .data
         ; %assign ROW_SIZE_OUT            7
         ; %assign LAST_INDEX_OUT          6
 
-        ; %assign FILE_SIZE               63
-        ; %assign MATRIX_SRC_SIZE         16
-        ; %assign MATRIX_OUT_SIZE         100
-        ; %assign ROW_SIZE_SRC            4
-        ; %assign ROW_SIZE_OUT            10
-        ; %assign LAST_INDEX_OUT          9
+        %assign FILE_SIZE               63
+        %assign MATRIX_SRC_SIZE         16
+        %assign MATRIX_OUT_SIZE         100
+        %assign ROW_SIZE_SRC            4
+        %assign ROW_SIZE_OUT            10
+        %assign LAST_INDEX_OUT          9
         
 
         %assign MASK            0xff
@@ -151,13 +196,15 @@ section .bss
         digitSpace      resb    100     ; Variables usadas para leer numeros enteros
         digitSpacePos   resb    8
 
-        matrix_src       resb    100     ; Arreglo de elementos de la imagen
-        matrix_out       resd    16      ; Arreglo de salida
-
         c1              resb    8       ; Variable para guardar el indice del valor conocido 1
         c2              resb    8       ; Variable para guardar el indice del valor conocido 2
         vc1             resb    8       ; Variable para guardar el contenido del valor conocido 1
         vc2             resb    8       ; Variable para guardar el contenido del valor conocido 2
+
+        matrix_src       resb    100     ; Arreglo de elementos de la imagen
+        matrix_out       resd    16      ; Arreglo de salida
+
+        
 
 section .text
         global _start
@@ -544,35 +591,9 @@ _horizontal_calc_loop:
         pop rbx
         pop rax
 
-
-        print_console msgDIV, 72
-        print_console new_line,1
-
-        print_console msgCol, 8
-        mov rax, r8
-        printRAX_push_out
-        print_console new_line,1
-
-        
-        print_console msgRow, 8
-        mov rax, r9
-        printRAX_push_out
-        print_console new_line,1
-        print_console new_line,1
-
-        print_console msgIndex,10
-        push rax
-        mov rax, r11
-        printRAX_push_out
-        print_console new_line,1
-        print_console new_line,1
-
-        pop rax
-
-        print_matrix_out
-
-
-
+;       ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+        ;print_horizontal_calc_debug                                                     ; DEBUG
+;       ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
 
         cmp r15, 0      ; IF (col_out % 3 == 0 and row_out % 3 == 0)
 
@@ -615,7 +636,8 @@ _horizontal_null_value:
         ; vc1 = matrix_out[c1-1]        | Valor conocido 1
         ; vc2 = matrix_out[c2-1]        | Valor conocido 2
 
-        mov rax, r11    
+        mov rax, r11
+        and rax, MASK    
         mov [c1], rax   ; c1 = indexCALC
 
         sub rax, 1
@@ -627,6 +649,7 @@ _horizontal_null_value:
 
         mov rax, r11
         add rax, 3
+        and rax, MASK
         mov [c2], rax   ; c2 = indexCALC + 3
 
         sub rax, 1      ; rax = c2 - 1
@@ -668,37 +691,19 @@ _put_new_value_2:
 
 _put_new_value_3:
 
-        print_console msgCalcNewValue, 34
-        print_console new_line,1
-        print_console new_line,1
-        print_console msgMatrixActual, 34
-        print_console new_line,1
-
         call _calc_interpolation        ; Calcula el valor desconocido y lo almacena en r15
 
-        print_matrix_out
-        print_console new_line,1
-
-        print_console msgNewValue, 10
-
-        mov rax, r15
-        printRAX_push_out
-        print_console new_line,1
-
-        print_console msgGuardaEnI, 21
-
-        mov rax, r10
-        printRAX_push_out
-        print_console new_line,1
-        print_console new_line,1
-
-        
+;       ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+        ;print_horizontal_calc_debug2                                                    ; DEBUG
+;       ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
 
         mov [rcx], r15w                 ; matrix_out[index_out] = r15w
                                         ; OJO: se usa r15w porque solo se ocupa 1byte
 
-        print_matrix_out
-        print_console new_line,1
+;       ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+        ;print_matrix_out                                                                ; DEBUG
+        ;print_console new_line,1
+;       ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
 
         jmp _continue_put_new_value
 
@@ -797,8 +802,6 @@ _vertical_values:
         print_matrix_out
 
 _end:
-
-        
 
         ; Termina el programa
 
