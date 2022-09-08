@@ -22,3 +22,7 @@ Si tomamos i=2, para encontrarlos indices de c1 y c2 se tiene lo siguiente:
 
     c1 = (c) + 1                # indice conocido 1
     c2 = (c + 3) + 1            # indice conocido 2
+
+
+
+2. Encontrar los valos e indices de valores conocidos a partir de la columna, fila y tamano de la matriz
