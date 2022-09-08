@@ -17,7 +17,7 @@
         mov rax, rdx
 %endmacro
 ;       _________________________________________________________________________________________
-;       Calcula 
+;       Calcula el modulo de las filas, columnas y la suma de los mods.
 ;       input:  %1 = col_out
 ;               %2 = row_out
 ;       output: r13 = (%1 mod 3) 
@@ -25,9 +25,6 @@
 ;               r15 = (%1 mod 3) + (%2 mod 3) 
 %macro mod_col_row 2
 
-        ;---------------------------------------------------------
-        ; Calcula el mod de las filas y columnas
-        ;---------------------------------------------------------
         push rax
         push rbx
         push rdx
@@ -51,8 +48,26 @@
         pop rax
 
 %endmacro
+;       _________________________________________________________________________________________
+;       Se actualizan los valores a las variables usadas en la formula de interpolacion
+;       input:  %1 = c1
+;               %2 = vc1
+;               %3 = c2
+;               %4 = vc2
+;       output: sin salidas
+%macro update_interpolation_variables 4
 
+        ; c1 :  Indice conocido 1
+        ; c2 :  Indice conocido 2
+        ; vc1 : Valor conocido 1
+        ; vc2 : Valor conocido 2
 
+        mov [c1],       %1      ; c1    = indexCALC
+        mov [vc1],      %2      ; vc1   = matrix_out[c1-1]
+        mov [c2],       %3      ; c2    = indexCALC + 3
+        mov [vc2],      %4      ; vc2   = matrix_out[c2-1]
+
+%endmacro
 
 ;       ⬂⬂⬂⬂⬂⬂⬂⬂⬂⬂⬂⬂⬂⬂⬂⬂⬂⬂⬂⬂⬂⬂⬂⬂⬂⬂⬂⬂⬂⬂⬂⬂⬃⬃⬃⬃⬃⬃⬃⬃⬃⬃⬃⬃⬃⬃⬃⬃⬃⬃⬃⬃⬃⬃⬃⬃⬃⬃⬃⬃⬃⬃⬃⬃
 ;       ⬄                                                                                      ⬄
