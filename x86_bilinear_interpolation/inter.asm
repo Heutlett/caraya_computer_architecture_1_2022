@@ -1,4 +1,4 @@
-; Read txt file and save into text array_src
+;       Directivas para llamadas al sistema
 
 STDOUT      equ 1
 
@@ -12,28 +12,8 @@ O_RDONLY    equ 0
 
 SYS_EXIT    equ 60
 
-;       Instruccion para imprimir un salto de linea:
-;       print_console new_line,1 
-
-%macro printRAX_push_out 0
-
-        push_registers
-        call _printRAX
-        pop_registers
-
-%endmacro 
-
-%macro print_array_out 0
-
-        push_registers
-        mov rax, array_out
-        mov rbx, ARRAY_OUT_SIZE
-        mov rcx, ROW_SIZE_OUT
-        call _print_array
-        pop_registers
-
-%endmacro
-
+;       _________________________________________________________________________________________
+;       Macro para hacer push de todos los registros menos RAX
 %macro push_registers 0
         push rbx        ; rbx
         push rcx        ; rcx
@@ -48,6 +28,8 @@ SYS_EXIT    equ 60
         push r15        ; r9
 %endmacro
 
+;       _________________________________________________________________________________________
+;       Macro para hacer pop de todos los valores de registros que estan en el stack menos RAX
 %macro pop_registers 0
         pop r15        ; r9
         pop r14        ; r8
@@ -62,22 +44,39 @@ SYS_EXIT    equ 60
         pop rbx        ; rbx        
 %endmacro
 
-%macro add_2 2
+;       _________________________________________________________________________________________
+;       Imprime el valor entero de RAX con respaldo de registros
+%macro printRAX_push_out 0
 
-        mov rax, 0
-        add rax, %1
-        add rax, %2
+        push_registers
+        call _printRAX
+        pop_registers
+
+%endmacro 
+
+;       _________________________________________________________________________________________
+;       Imprime la matriz de salida con respaldo de registros
+%macro print_matrix_out 0
+
+        push_registers
+        mov rax, matrix_out
+        mov rbx, MATRIX_OUT_SIZE
+        mov rcx, ROW_SIZE_OUT
+        call _print_matrix
+        pop_registers
 
 %endmacro
 
-;       ; Calcula rax mod rbx, y lo guarda en rax
+;       _________________________________________________________________________________________
+;       Calcula rax mod rbx, y lo guarda en rax
 %macro modulo 0
         mov rdx, 0  
         div rbx     
         mov rax, rdx
 %endmacro       
 
-
+;       _________________________________________________________________________________________
+;       Imprime en pantalla, %1 = string, %2 = tamano, respalda registros
 %macro print_console 2
         push_registers
         mov rax, SYS_WRITE
@@ -109,16 +108,17 @@ section .data
         msgNewValue     db  "NewValue",0
         msgPrueba       db  "prueba", 0    
 
-        new_line        db "",  10          ; Valor de una nueva linea para imprimir
-        tab             db "",9
-        ; ------------------- CONSTANTES -----------------------------------------
+        new_line        db  "",  10             ; Valor de una nueva linea para imprimir
+        tab             db  "",9                ; Valor de un tab para imprimir
+
+        ; _____________________________ CONSTANTES _________________________________________
         
         %assign FILE_SIZE               15
-        %assign ARRAY_SRC_SIZE          4
-        %assign ARRAY_OUT_SIZE          16
-        %assign ARRAY_OUT_SIZE_1        15
+        %assign MATRIX_SRC_SIZE         4
+        %assign MATRIX_OUT_SIZE         16
         %assign ROW_SIZE_SRC            2
         %assign ROW_SIZE_OUT            4
+        %assign LAST_INDEX_OUT          3
         
 
         %assign MASK            0xff
@@ -127,20 +127,18 @@ section .data
         
 
 section .bss
-        text            resb    100         ; Contenido del texto leido del archivo
+        text            resb    100     ; Contenido del texto leido del archivo
 
-        digitSpace      resb    100         ; Variables usadas para leer numeros enteros
+        digitSpace      resb    100     ; Variables usadas para leer numeros enteros
         digitSpacePos   resb    8
 
-        array_src       resb    100         ; Arreglo de elementos de la imagen
-        array_out       resd    16          ; Arreglo de salida
+        matrix_src       resb    100     ; Arreglo de elementos de la imagen
+        matrix_out       resd    16      ; Arreglo de salida
 
-        mod_result      resb    1
-
-        c1              resb    8
-        c2              resb    8
-        vc1             resb    8
-        vc2             resb    8
+        c1              resb    8       ; Variable para guardar el indice del valor conocido 1
+        c2              resb    8       ; Variable para guardar el indice del valor conocido 2
+        vc1             resb    8       ; Variable para guardar el contenido del valor conocido 1
+        vc2             resb    8       ; Variable para guardar el contenido del valor conocido 2
 
 section .text
         global _start
@@ -165,7 +163,7 @@ _start:
         syscall
 
         ; [SYSCALL: CLOSE]   |   Se cierra el archivo
-
+        
         mov rax, SYS_CLOSE      ; %rax          : 0x00              |   Lee el archivo
         pop rdi                 ; arg0 (%rdi)   : unsigned int fd   |   Archivo a cerrar
         syscall
@@ -173,25 +171,22 @@ _start:
         ; Imprime el texto que se ha leido
 
         mov rax, msgDIV
-        call _print
+        call _print_string
 
         mov rax, msg1
-        call _print
+        call _print_string
 
         mov rax, text
-        call _print
+        call _print_string
 
-
-;   Convierte el contenido del archivo txt de formato ascii a un arreglo de enteros
+;       _________________________________________________________________________________________
+;       Convierte el contenido del archivo txt de formato ascii a un arreglo de enteros
 _convert_ascii_dec:
 
-        mov r12, array_src  ; Puntero array_src
-        mov rbx, text   ; Puntero txt
-
-        mov r9, 100     ; Multiplicador
-
-        mov r11, 0      ; Num
-
+        mov r12, matrix_src     ; Puntero matrix_src
+        mov rbx, text           ; Puntero txt
+        mov r9, 100             ; Multiplicador
+        mov r11, 0              ; Num
 
 _convert_ascii_dec_loop:
 
@@ -228,26 +223,25 @@ _convert_ascii_dec_loop:
         add r14, 1      ; Se aumenta el contador
         jmp _convert_ascii_dec_loop
 
-
 _space:
 
-        mov [r12], r11      ; Guarda en la posicion r12 del array_src el valor de r11
+        mov [r12], r11          ; Guarda en la posicion r12 del matrix_src el valor de r11
 
-        add r12, 4
-        ;inc r12             ; Se mueve el puntero del array_src
+        add r12, 4              ; Se desplaza el puntero del matrix_src      
 
-        mov r9, 100         ; Resetea el multiplicador
-        mov r11, 0          ; Resetea el numero actual
+        mov r9, 100             ; Resetea el multiplicador
+        mov r11, 0              ; Resetea el numero actual
 
-        cmp rcx, ASCII_END  ; Si encuentra el fin
+        cmp rcx, ASCII_END      ; Si encuentra el fin
         je _interpolation
 
         jmp _convert_ascii_dec_loop
 
-;   Imprime el string al que apunta el registro rax
-;   input:  rax: puntero al string
-;   output: string al que apunta rax
-_print:
+;       _________________________________________________________________________________________
+;       Imprime en consola el string al que apunta el registro rax
+;       input:  rax: puntero al string
+;       output: sin salidas.
+_print_string:
         push rax
         mov rbx, 0
 
@@ -267,21 +261,25 @@ _printLoop:
 
         ret
 
-
-
-_print_array:    ; rax = array,   rbx = size,   rcx = row_size
+;       _________________________________________________________________________________________
+;       Imprime en consola la matriz al que apunta el registro rax
+;       input:  rax: puntero de la matriz
+;               rbx: tamano de la matriz
+;               rcx; tamano las filas
+;       output: sin salidas
+_print_matrix:
 
         push r9
         push r10
         push r11
 
         mov r9, 0           ; Contador
-        mov r10, rax        ; Puntero de array
+        mov r10, rax        ; Puntero de la matriz
 
-_print_array_Loop:
+_print_matrix_Loop:
 
-        cmp r9, rbx  ; Si contador == ARRAY_SRC_SIZE
-        je  _print_array_end
+        cmp r9, rbx  ; Si contador == MATRIX_SRC_SIZE
+        je  _print_matrix_end
 
         mov rax, [r10]
         and rax, MASK
@@ -293,12 +291,10 @@ _print_array_Loop:
         print_console tab,1
 
         add r10,4
-
         add r9,1
 
         push rax
         push rbx
-        
 
         mov rax, r9
         mov rbx, rcx
@@ -309,11 +305,10 @@ _print_array_Loop:
 
 _continue_print:
 
-
         pop rbx
         pop rax
 
-        jmp _print_array_Loop
+        jmp _print_matrix_Loop
 
 _print_new_row:
 
@@ -321,7 +316,7 @@ _print_new_row:
 
         jmp _continue_print
 
-_print_array_end:
+_print_matrix_end:
 
         pop r11
         pop r10
@@ -330,7 +325,10 @@ _print_array_end:
         print_console new_line,1
 
         ret 
-
+;       _________________________________________________________________________________________
+;       Imprime en consola el valor del registro RAX en formato entero
+;       input:  rax: entero
+;       output: sin salidas
 _printRAX:
         mov rcx, digitSpace         
         mov rbx, 32                 ; Se pone imprime al final un espacio como separador
@@ -368,176 +366,141 @@ _printRAXLoop2:
 
         ret
 
-
-
+;       _________________________________________________________________________________________
+;                               INICIO DEL ALGORITMO DE INTERPOLACION
 _interpolation:
 
-        ; Se imprime el contenido del array_src
+        ; Se imprime el contenido del matrix_src
         print_console msg2, 31
         print_console new_line,1
         print_console new_line,1
 
-        mov rax, array_src
-        mov rbx, ARRAY_SRC_SIZE
+        mov rax, matrix_src
+        mov rbx, MATRIX_SRC_SIZE
         mov rcx, ROW_SIZE_SRC
-        call _print_array
+        call _print_matrix
 
         mov rax, msgDIV
-        call _print
+        call _print_string
 
         mov rax, msg3
-        call _print
+        call _print_string
 
-        mov rax, msg4
-        call _print
-
-
+;       _________________________________________________________________________________________
+;       Inicializa la matriz colocando los valores conocidos y en -1 los valores no conocidos
 _init_matrix:
 
-        mov rbx, array_src      ; Puntero array_src
-        mov rcx, array_out      ; Puntero array_out
+        mov rbx, matrix_src     ; Puntero matrix_src
+        mov rcx, matrix_out     ; Puntero matrix_out
         mov r8, 0               ; index_src
         mov r9, 0               ; index_out = c      
-        mov r10, ROW_SIZE_OUT   ; last_index_out
-        sub r10, 1
         mov r11, 0              ; col_out
         mov r12, 0              ; row_out
 
-
+;       _________________________________________________________________________________________
+;                             Se itera sobre la matriz de salida matrix_out
 _init_matrix_loop:
 
-        cmp r9, ARRAY_OUT_SIZE
-        je      _horizontal_calc
+        cmp r9, MATRIX_OUT_SIZE         ; IF (index_out == MATRIX_OUT_SIZE)
+        je      _horizontal_calc        ; se termina la inicializacion de la matriz de salida
 
 
-        mov rax,[rcx]
-        and rax, MASK
-
-
-        ; Calcula el mod de las filas y columnas
+        ; Calcula el mod de las filas y columnas y lo suma
         push rax
         push rbx
         push rdx
 
         mov rax, r11
         mov rbx, 3
-        modulo          ; columna mod3
+        modulo          ; col_out % 3
         mov r13,rax     
 
         mov rax, r12
         mov rbx, 3
 
-        modulo          ; fila mod3
-        add r13, rax
+        modulo          ; row_out % 3
+        add r13, rax    ; r13 = (col_out % 3) + (row_out % 3)
 
         pop rdx
         pop rbx
         pop rax
         
-        cmp r13, 0              ; if(col_out%3==0 and row_out%3==0):
-        je      _known_value    ; Coloca en la matriz inicial un valor conocido
-        jne     _null_value
+        cmp r13, 0              ; IF (col_out % 3 == 0 and row_out % 3 == 0)
+        je      _known_value    ; Agrega un valor conocido a matrix_out
 
 _continue_columns:
 
-        cmp r11, r10            ; if (col_out == last_index_out)
-        je      _new_row        ; nueva fila
+        cmp r11, LAST_INDEX_OUT ; IF (col_out == LAST_INDEX_OUT)
+        je      _new_row        ; Se desplaza a la siguiente fila
 
 _continue_new_row:
 
-        inc r11                 ; col_out = col_out + 1
-
-        inc r9
-        
+        inc r11         ; col_out = col_out + 1
+        inc r9          ; index_out = index_out + 1
 
         jmp _init_matrix_loop
 
 _new_row:
 
-        print_console new_line,1
-
-        mov r11, -1              ; col_out = -1
-        inc r12                  ; row_out = row_out +1
+        mov r11, -1     ; col_out = -1
+        inc r12         ; row_out = row_out + 1
 
         jmp _continue_new_row
 
+;       _________________________________________________________________________________________
+;       Encuentra un index_out al que le corresponde un valor conocido:  
+;               matrix_out[index_out] = matrix_src[index_src]
 _known_value:
 
-        push rbx        ; array_src     
-        push rcx        ; array_out
+        push rbx        
+        push rcx        
         push rax
         push rdx
 
-        mov rdx, r8
-        shl rdx, 2
+        mov rdx, r8     ; rdx = index_src
+        shl rdx, 2      ; Alinea el index_src
 
-        add rbx, rdx     ; addressing
+        add rbx, rdx    ; Desplaza el puntero matrix_src a la posicion index_src
 
-        mov rdx, r9
-        shl rdx, 2
+        mov rdx, r9     ; rdx = index_out
+        shl rdx, 2      ; Alinea el index_out 
 
-        add rcx, rdx     ; addressing
+        add rcx, rdx    ; Desplaza el puntero matrix_out a la posicion index_out
+        
 
-        mov rax, [rbx]
-        and rax, MASK
-
-        mov [rcx], rax
-
-        push_registers
-        call _printRAX
-        pop_registers
-
-        print_console tab,1
+        mov eax, [rbx]  ; rax = matrix_src[index_src] 
+        mov [rcx], eax  ; matrix_out[index_out] = rax
 
         pop rdx
         pop rax
         pop rcx
         pop rbx
         
-
         inc r8          ; index_src = index_src + 1
 
         jmp _continue_columns
 
-_null_value:
-
-        push rax
-        mov rax, 0
-
-        push_registers
-        call _printRAX
-        pop_registers
-
-        pop rax
-
-        print_console tab,1
-
-        jmp _continue_columns
-
+;       _________________________________________________________________________________________
+;                       Se inicia el calculo de los valores horizontales
 _horizontal_calc:
 
-        mov rbx, array_out
+        ;       Imprime la matriz_out con los valores conocidos
+        mov rax, msg4
+        call _print_string
+        print_matrix_out
 
-        mov r8, 0       ; col_out
-        mov r9, 0       ; row_out
+        mov rbx, matrix_out     ; Puntero a matrix_out
 
-        mov r10, 0      ; indexArray = c
-        mov r11, 1      ; indexCALC
+        mov r8, 0               ; col_out
+        mov r9, 0               ; row_out
 
-        mov r12, ROW_SIZE_OUT   ; last_index_out
-        sub r12, 1
-
-        mov r15, 0
+        mov r10, 0              ; index_out = c
+        mov r11, 1              ; indexCALC
 
 _horizontal_calc_loop:
 
-
-        cmp r10, ARRAY_OUT_SIZE_1
-        je      _end
-
-        mov rax, 0
-        mov rax, r8
-        
+        cmp r10, MATRIX_OUT_SIZE        ; IF (index_out == MATRIX_OUT_SIZE)
+        je      _vertical_values        ; Finaliza el calculo de los valores horizontales    
 
         ; Calcula el mod de las filas y columnas
         push rax
@@ -547,98 +510,103 @@ _horizontal_calc_loop:
         mov rax, r8
         mov rbx, 3
         modulo          
-        mov r13,rax     ; r13 = mod_col
+        mov r13,rax     ; r13 = col_out % 3
 
         mov rax, r9
         mov rbx, 3
 
         modulo          
-        mov r14, rax    ; r14 = mod_row
+        mov r14, rax    ; r14 = row_out % 3
         mov r15, 0
         add r15, r13    
-        add r15, r14    ; r15 = mod_col + mod_row
+        add r15, r14    ; r15 = (col_out % 3) + (row_out % 3)
 
         pop rdx
         pop rbx
         pop rax
 
-        cmp r15, 0
+        cmp r15, 0      ; IF (col_out % 3 == 0 and row_out % 3 == 0)
+
         je      _horizontal_null_value
 
 _continue_horizontal_null_value:
 
-        cmp r13, 0
+        ; Primera condicion requerida para que el index_out corresponda a un valor desconocido horizontal
+        cmp r13, 0      ; IF (col_out % 3 == 0)         
         jne     _put_new_value_1
 
 _continue_put_new_value:
 
-        cmp r8, r12            ; if (col_out == last_index_out)
-        je      _new_row_horizontal        ; nueva fila
-
+        cmp r8, LAST_INDEX_OUT          ; IF (col_out == LAST_INDEX_OUT)
+        je      _new_row_horizontal     ; Se desplaza una fila adelante
 
 _continue_new_row_horizontal:
 
         inc r8          ; col_out = col_out + 1
-        inc r10         ; c
+        inc r10         ; index_out = index_out + 1
         inc r11         ; indexCALC = indexCALC + 1
-
 
         jmp _horizontal_calc_loop
 
 _new_row_horizontal:
 
-        print_console new_line,1
-
-        mov r8, -1              ; col_out = -1
-        inc r9                  ; row_out = row_out +1
+        mov r8, -1      ; col_out = -1
+        inc r9          ; row_out = row_out + 1
 
         jmp _continue_new_row_horizontal
 
-
 _horizontal_null_value:
 
-        mov rax, r11
-        mov [c1], rax
+        ; Se asignan los valores a las variables usadas en la formula de interpolacion
 
-        mov rax, r11
+        ; indexCALC : es el mismo indice index_out pero +1
+
+        ; c1 = indexCALC                | Indice conocido 1
+        ; c2 = indexCALC + 3            | Indice conocido 2
+        ; vc1 = matrix_out[c1-1]        | Valor conocido 1
+        ; vc2 = matrix_out[c2-1]        | Valor conocido 2
+
+        mov rax, r11    
+        mov [c1], rax   ; c1 = indexCALC
+
         sub rax, 1
-
         shl rax, 2
-
-        add rax, array_out            ; addressing: array + c1-1
-        mov rax, [rax]          ;vc1 = I_out2[c1-1]
+        add rax, matrix_out            
+        mov rax, [rax]  ; rax = matrix_out[c1-1]          
         and rax, MASK
-        mov [vc1], rax
+        mov [vc1], rax  ; vc1 = matrix_out[c1-1]
 
         mov rax, r11
         add rax, 3
-        mov [c2], rax
+        mov [c2], rax   ; c2 = indexCALC + 3
 
-        sub rax, 1
+        sub rax, 1      ; rax = c2 - 1
         shl rax, 2
-
-        add rax, array_out            ; addressing: array + c1-1
-        mov rax, [rax]          ;vc1 = I_out2[c1-1]
+        add rax, matrix_out            
+        mov rax, [rax]  ; rax = matrix_out[c2-1]        
         and rax, MASK
-        mov [vc2], rax
+        mov [vc2], rax  ; vc2 = matrix_out[c2-1]
 
         jmp _continue_horizontal_null_value
 
+;       _________________________________________________________________________________________
+;       Para que el indice actual de matrix_out corresponda a un valor desconocido horizontal
+;       se debe cumplir la siguiente condicion: IF (col_out % 3 != 0 and row_out % 3 == 0)
+;       si se llego hasta aqui ya se cumplio la primera condicion (col_out % 3 != 0)
 _put_new_value_1:
 
-        cmp r14, 0
-        je _put_new_value_2
+        cmp r14, 0              ; IF (row_out % 3 == 0)
+        je _put_new_value_2     ; Se cumple la segunda condicion
 
         jmp _continue_put_new_value
 
-
 _put_new_value_2:
 
-        mov rax, r10
+        mov rax, r10            ; rax = index_out
 
         shl rax, 2
 
-        add rax, array_out
+        add rax, matrix_out
 
         mov rcx, 0
         mov rcx,rax             
@@ -746,12 +714,16 @@ _calc_interpolation:
 
         ret
 
-_end:
+_vertical_values:
 
         mov rax, msg5
-        call _print
+        call _print_string
         
-        print_array_out
+        print_matrix_out
+
+_end:
+
+        
 
         ; Termina el programa
 
