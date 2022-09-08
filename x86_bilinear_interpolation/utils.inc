@@ -8,6 +8,23 @@
 ;       Importa los macros y rutinas para imprimir en consola
 %include "prints.inc"
 
+;       _________________________________________________________________________________________
+;       Obtiene el valor y el puntero de la matriz de salida en un indice de entrada
+;       input:  %1 = index_out
+;       output: rax = matrix_out[%1]
+;               rcx = puntero al valor de rax en matrix_out 
+%macro get_and_value_pointer_matrix_out 1
+
+        mov rax, %1            ; %1 = index_out
+        shl rax, 2              ; Se alinea el indice
+        add rax, matrix_out     ; Se desplaza el puntero matrix_out a la posicion index_out
+        
+        mov rcx,rax             ; Se guarda en rcx el puntero para usarlo posteriormente
+
+        mov rax, [rax]          ; rax = matrix_out[index_out]
+        and rax, MASK
+
+%endmacro
 
 ;       _________________________________________________________________________________________
 ;       Calcula rax mod rbx, y lo guarda en rax
@@ -118,12 +135,21 @@
 ;       output: sin salidas
 %macro insert_new_value_into_matrix_out 0
 
+        print_console msgNewValue, 10
+        push rax
+        mov rax, r15
+        printRAX_push_out
+        print_console new_line,1
+        print_console new_line,1
+        pop rax
+
         call calc_interpolation        ; Calcula el valor desconocido y lo almacena en r15
 
         mov [rcx], r15w                 ; matrix_out[index_out] = r15w
                                         ; OJO: se usa r15w porque solo se ocupa 1byte
 
 %endmacro
+
 
 ;       ⬂⬂⬂⬂⬂⬂⬂⬂⬂⬂⬂⬂⬂⬂⬂⬂⬂⬂⬂⬂⬂⬂⬂⬂⬂⬂⬂⬂⬂⬂⬂⬂⬃⬃⬃⬃⬃⬃⬃⬃⬃⬃⬃⬃⬃⬃⬃⬃⬃⬃⬃⬃⬃⬃⬃⬃⬃⬃⬃⬃⬃⬃⬃⬃
 ;       ⬄                                                                                      ⬄

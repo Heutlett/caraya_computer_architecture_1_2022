@@ -40,7 +40,7 @@
 %endmacro
 
 ;       Print para debuggear el calculo de valores horizontales (1)
-%macro print_horizontal_calc_debug 0
+%macro print_calc_debug 0
         print_console msgDIV, 72
         print_console new_line,1
 
@@ -68,15 +68,7 @@
 %endmacro
 
 ;       Print para debuggear el calculo de valores horizontales (2)
-%macro print_horizontal_calc_debug2 0
-        print_console msgCalcNewValue, 34
-        print_console new_line,1
-        print_console new_line,1
-        print_console msgNewValue, 10
-
-        mov rax, r15
-        printRAX_push_out
-        print_console new_line,1
+%macro print_calc_debug2 0
 
         print_console msgGuardaEnI, 21
 

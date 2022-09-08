@@ -46,6 +46,7 @@ section .data
         msgCalcNewValue db  "Calculando nuevo valor desconocido",0
         msgGuardaEnI    db  "Guarda en el indice: ",0
         msgMatrixActual db  "Matriz actual antes de calcular",0
+        msg6            db  "▶ Se colocara un nuevo valor"
 
         new_line        db  "",  10             ; Valor de una nueva linea para imprimir
         tab             db  "",9                ; Valor de un tab para imprimir
@@ -130,14 +131,14 @@ _bilinear_interpolation:
 _bilinear_interpolation_calc_loop:
 
         cmp r10, MATRIX_OUT_SIZE        ; IF (index_out == MATRIX_OUT_SIZE)
-        je      _vertical_values        ; Finaliza el calculo de los valores horizontales    
+        je      _end        ; Finaliza el calculo de los valores horizontales    
 
         ; Calcula el mod de las filas y columnas
         ; Guarda en r13 = col_out%3, r14 = row_out%3, r15 = col_out%3 + row_out%3
         mod_col_row r8,r9
 
 ;       ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
-        print_horizontal_calc_debug                                                     ; DEBUG
+        print_calc_debug                                                                ; DEBUG
 ;       ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
 
         cmp r15, 0      ; IF (col_out % 3 == 0 and row_out % 3 == 0)
@@ -151,6 +152,11 @@ _continue_set_horizontal_inter_variables:
         jne     _put_new_horizontal_value_cond
 
 _continue_put_new_horizontal_value:
+
+;       ---------------------- vertical -------------------
+        je     _put_new_vertical_value_cond
+
+_continue_put_new_vertical_value:
 
         cmp r8, LAST_INDEX_OUT          ; IF (col_out == LAST_INDEX_OUT)
         je      _new_row     ; Se desplaza una fila adelante
@@ -190,14 +196,8 @@ _put_new_horizontal_value_cond:
 
 _put_new_horizontal_value:
 
-        mov rax, r10            ; rax = index_out
-        shl rax, 2              ; Se alinea el indice
-        add rax, matrix_out     ; Se desplaza el puntero matrix_out a la posicion index_out
-              
-        mov rcx,rax             ; Se guarda en rcx el puntero para usarlo posteriormente
-
-        mov rax, [rax]          ; rax = matrix_out[index_out]
-        and rax, MASK
+        ;       Almacena en rax el valor de matrix_out[r10] y en rcx el puntero
+        get_and_value_pointer_matrix_out r10
 
         ; Esta condicion se debe cambiar, debe ser == -1
         cmp rax, 0              ; IF (matrix_out[index_out] == 0)
@@ -207,9 +207,11 @@ _put_new_horizontal_value:
 
 _put_new_value:
 
-        
+        print_console msg6, 31
+        print_console new_line,1
+
 ;       ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
-        print_horizontal_calc_debug2                                                    ; DEBUG
+        print_calc_debug2                                                    ; DEBUG
 ;       ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
 
         ;       Inserta un nuevo valor a matrix_out
@@ -226,14 +228,41 @@ _put_new_value:
 
 ;       _________________________________________________________________________________________
 ;                       Se inicia el calculo de los valores horizontales
-_vertical_values:
+_put_new_vertical_value_cond:
+
+        cmp r14, 0                              ; IF (row_out % 3 != 0)
+        jne _put_new_vertical_value             ; Se cumple la segunda condicion
+
+        jmp _continue_put_new_vertical_value    ; No se cumple la segunda condicion
+
+_put_new_vertical_value:
+
+        ;       Almacena en rax el valor de matrix_out[r10] y en rcx el puntero
+        get_and_value_pointer_matrix_out r10
+
+        print_console msgPrueba,5
+        print_console msgPrueba,5
+        print_console new_line,1
+
+        printRAX_push_out
+
+        ; Esta condicion se debe cambiar, debe ser == -1
+        cmp rax, 0              ; IF (matrix_out[index_out] == 0)
+        je _put_new_value     ; Si se cumple significa que es un valor desconocido que se debe calcular
+        
+        print_console new_line,1
+        print_console msgPrueba,5
+        print_console msgPrueba,5
+
+        jmp _continue_put_new_vertical_value
+
+_end:
+
 
         mov rax, msg5
         call print_string
         
         print_matrix_out
-
-_end:
 
         ; Termina el programa
 
