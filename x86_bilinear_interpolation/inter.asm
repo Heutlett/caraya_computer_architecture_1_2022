@@ -139,7 +139,7 @@ _bilinear_interpolation_calc_loop:
         
 
 ;       ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
-        ;print_horizontal_calc_debug                                                     ; DEBUG
+        print_horizontal_calc_debug                                                     ; DEBUG
 ;       ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
 
         cmp r15, 0      ; IF (col_out % 3 == 0 and row_out % 3 == 0)
@@ -241,105 +241,18 @@ _put_new_value_3:
         call calc_interpolation        ; Calcula el valor desconocido y lo almacena en r15
 
 ;       ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
-        ;print_horizontal_calc_debug2                                                    ; DEBUG
+        print_horizontal_calc_debug2                                                    ; DEBUG
 ;       ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
 
         mov [rcx], r15w                 ; matrix_out[index_out] = r15w
                                         ; OJO: se usa r15w porque solo se ocupa 1byte
 
 ;       ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
-        ;print_matrix_out                                                                ; DEBUG
-        ;print_console new_line,1
+        print_matrix_out                                                                ; DEBUG
+        print_console new_line,1
 ;       ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
 
         jmp _continue_put_new_value
-
-;       _________________________________________________________________________________________
-;       Calcula el valor desconocido mediante la formula de interpolacion bilineal
-;
-;       Formula: value[i] = (c2-i)*vc1/(c2-c1) + (i-c1)*vc2/(c2-c1)
-;
-;       input:          r11 = indexCALC
-;       output:         r15 = resultado
-calc_interpolation:
-
-        push rax
-        push rbx
-        push rcx
-        push rdx
-        push r8
-        push r9
-        push r10
-        push r11
-        push r12
-
-        mov r8,r11              ; r8 = indexCALC
-        mov r9, [c1]
-        and r9, MASK
-        mov r10, [vc1]
-        and r10, MASK
-        mov r11, [c2]
-        and r11, MASK
-        mov r12, [vc2]
-        and r12, MASK
-
-        ; ((c2-i)/(c2-c1))*vc1
-        mov rcx, 0     
-        mov rcx, r11
-        sub rcx, r8     ;(c2-i)         
-
-        mov rbx, 0
-        mov rbx, r11
-        sub rbx, r9     ;(c2-c1)       
-
-        ; (c2-i)*vc1
-        mov rax, r10    ; (vc1)
-        mul rcx         
-        mov rcx, rax    ; (c2-i)*vc1
-
-        ; (c2-i)*vc1/(c2-c1)
-        mov rdx, 0      ; 0 utilizado en la division para evitar error
-        mov rax, rcx    ; (c2-i)*vc1
-        div rbx         ; rax/(c2-c1)
-        mov rbx, rax    ; ((c2-i)/(c2-c1))
-
-        mov r15, rbx    ; r15 = ((c2-i)/(c2-c1))*vc1
-
-        ; ((i-c1)/(c2-c1))*vc2
-        mov rcx, 0      ; der
-        mov rcx, r8
-        sub rcx, r9     ;(i-c1)
-
-        mov rbx, 0
-        mov rbx, r11
-        sub rbx, r9     ;(c2-c1)
-
-        ; (i-c1)*vc2
-        mov rax, r12    ; (vc2)
-        mul rcx         
-        mov rcx, rax    ; (i-c1)*vc2
-
-        ; (i-c1)*vc2/(c2-c1)
-        mov rdx, 0      ; 0 utilizado en la division para evitar error
-        mov rax, rcx    ; (i-c1)*vc2
-        div rbx         ; rax/(c2-c1)
-
-        mov rbx, rax    ; rbx = (i-c1)*vc2/(c2-c1)
-
-        add r15, rax    ; r15 = Resultado 
-        and r15, MASK
-
-        pop r12
-        pop r11
-        pop r10
-        pop r9
-        pop r8
-        pop rdx
-        pop rcx
-        pop rbx
-        pop rax
-
-        ret
 
 ;       _________________________________________________________________________________________
 ;                       Se inicia el calculo de los valores horizontales
