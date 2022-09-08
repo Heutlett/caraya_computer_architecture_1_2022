@@ -183,10 +183,10 @@ def generate_initial_Iout(I, n_src):
 
     
     last_index_src = n_src-1
-    print("last_index_src: ", last_index_src)
+    #print("last_index_src: ", last_index_src)
 
     tamano = (last_index_src*3+1)*(last_index_src*3+1)    # El final debería ser de 292x292
-    print("size of I2_out: ", tamano)
+    #print("size of I2_out: ", tamano)
 
     I_out2 = np.zeros(tamano)
     I_out2 = fill_null_values(I_out2)
@@ -266,11 +266,28 @@ def horizontal_optimized_calc(I,last_index):
 
 def interpolation_optimized(I, n_src):
 
-    tamano = n_src*n_src
-    print("Size of IOUT: ", tamano)
+    # %assign FILE_SIZE               35
+    # %assign MATRIX_SRC_SIZE         9
+    # %assign MATRIX_OUT_SIZE         49
+    # %assign ROW_SIZE_SRC            4
+    # %assign ROW_SIZE_OUT            10
+    # %assign LAST_INDEX_OUT          9
 
-    last_index = n_src-1
-    print("Last Index: ", last_index)
+    row_size_out = (n_src-1)*3+1
+
+    array_size_src = n_src*n_src
+    array_size_out = row_size_out*row_size_out
+
+    print("MATRIX_SRC_SIZE = ", array_size_src)
+
+    print("MATRIX_OUT_SIZE = ", array_size_out)
+
+    print("ROW_SIZE_SRC = ", n_src)
+
+    print("ROW_SIZE_OUT = ", row_size_out)
+
+    last_index = row_size_out-1
+    print("LAST_INDEX_OUT: ", last_index)
     
     print()
 
@@ -339,8 +356,11 @@ def test_algorithm():
 
 
 
-I_2 = np.array([10,20,30,40])
-n_src = 2                           # Esto se lo voy a pasar al compilador yo mismo como argumento de linea de comandos
+#I_2 = np.array([10,20,30,40])
+#n_src = 2                           # Esto se lo voy a pasar al compilador yo mismo como argumento de linea de comandos
+
+I_2 = np.array([10,20,30,40,30,40,50,60,50])
+n_src = 3
 
 #I_2 = np.array([10,20,30,40,30,40,50,60,50,60,70,80,70,80,90,0])
 #n_src = 4
@@ -351,7 +371,7 @@ row_size_src = n_src-1
 row_size_out = row_size_src*3+1
 
 
-I_out2 = interpolation_optimized(I_out2,row_size_out)
+I_out2 = interpolation_optimized(I_out2,n_src)
 
 print("\nI2:")
 printerArray(I_2,n_src)

@@ -88,8 +88,9 @@ SYS_EXIT    equ 60
 %endmacro
 
 section .data
-        ;filename        db  "imagen.txt",0
-        filename        db  "imagen2.txt",0
+        ;filename       db  "imagen2x2.txt",0
+        filename        db  "imagen3x3.txt",0
+        ;filename       db  "imagen4x4.txt",0
 
         msgDIV          db  "------------------------------------------------------------------------",0
         msg1            db  "---------------------      Procesando archivo      ---------------------",10,10,"Contenido del archivo:",0
@@ -121,12 +122,19 @@ section .data
         ; %assign ROW_SIZE_OUT            4
         ; %assign LAST_INDEX_OUT          3
 
-        %assign FILE_SIZE               63
-        %assign MATRIX_SRC_SIZE         16
-        %assign MATRIX_OUT_SIZE         100
-        %assign ROW_SIZE_SRC            4
-        %assign ROW_SIZE_OUT            10
-        %assign LAST_INDEX_OUT          9
+        %assign FILE_SIZE               35
+        %assign MATRIX_SRC_SIZE         9
+        %assign MATRIX_OUT_SIZE         49
+        %assign ROW_SIZE_SRC            3
+        %assign ROW_SIZE_OUT            7
+        %assign LAST_INDEX_OUT          6
+
+        ; %assign FILE_SIZE               63
+        ; %assign MATRIX_SRC_SIZE         16
+        ; %assign MATRIX_OUT_SIZE         100
+        ; %assign ROW_SIZE_SRC            4
+        ; %assign ROW_SIZE_OUT            10
+        ; %assign LAST_INDEX_OUT          9
         
 
         %assign MASK            0xff
