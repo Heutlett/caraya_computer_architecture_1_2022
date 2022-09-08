@@ -79,8 +79,6 @@ SYS_EXIT    equ 60
 section .data
         filename        db  "imagen.txt",0
 
-        array_out TIMES 16 dw 0         
-
         msgDIV          db  "------------------------------------------------------------------------",0
         msg1            db  "---------------------      Procesando archivo      ---------------------",10,10,"Contenido del archivo:",0
         msg2            db  "Contenido de la matriz inicial:",0
@@ -121,9 +119,7 @@ section .bss
         digitSpacePos   resb    8
 
         array_src       resb    100         ; Arreglo de elementos de la imagen
-
-        ;array_out       resb    16
-        ;array_out2      resb    16
+        array_out       resd    16          ; Arreglo de salida
 
         mod_result      resb    1
 
@@ -170,6 +166,7 @@ _start:
 
         mov rax, text
         call _print
+
 
 ;   Convierte el contenido del archivo txt de formato ascii a un arreglo de enteros
 _convert_ascii_dec:
@@ -426,9 +423,14 @@ _known_value:
         push rbx        ; array_src     
         push rcx        ; array_out
         push rax
+        push rdx
 
         add rbx, r8     ; addressing
-        add rcx, r9     ; addressing
+
+        mov rdx, r9
+        shl rdx, 2
+
+        add rcx, rdx     ; addressing
 
         mov rax, [rbx]
         and rax, MASK
@@ -441,9 +443,11 @@ _known_value:
 
         print_console tab,1
 
+        pop rdx
         pop rax
         pop rcx
         pop rbx
+        
 
         inc r8          ; index_src = index_src + 1
 
@@ -552,6 +556,9 @@ _horizontal_null_value:
 
         mov rax, r11
         sub rax, 1
+
+        shl rax, 2
+
         add rax, array_out            ; addressing: array + c1-1
         mov rax, [rax]          ;vc1 = I_out2[c1-1]
         and rax, MASK
@@ -562,6 +569,8 @@ _horizontal_null_value:
         mov [c2], rax
 
         sub rax, 1
+        shl rax, 2
+
         add rax, array_out            ; addressing: array + c1-1
         mov rax, [rax]          ;vc1 = I_out2[c1-1]
         and rax, MASK
@@ -584,6 +593,8 @@ _put_new_value_2:
 
         mov rax, r10
 
+        shl rax, 2
+
         add rax, array_out
 
         mov rcx, 0
@@ -601,9 +612,7 @@ _put_new_value_3:
 
         call _calc_interpolation
 
-        mov rax, [rcx]  ; Mascara 0x140000, se arregla para agregar (ii) en 0x1400ii
-        add r15, rax
-        mov [rcx], r15
+        mov [rcx], r15w
 
         jmp _continue_put_new_value
 

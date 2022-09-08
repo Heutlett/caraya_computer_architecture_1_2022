@@ -25,3 +25,7 @@ gdb mod
 nasm -felf64 -o div.o div.asm
 ld -o div div.o
 gdb div
+
+nasm -felf64 -o address.o address.asm
+ld -o address address.o
+gdb address
