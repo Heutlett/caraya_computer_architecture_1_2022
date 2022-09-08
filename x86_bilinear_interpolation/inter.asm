@@ -88,8 +88,8 @@ SYS_EXIT    equ 60
 %endmacro
 
 section .data
-        ;filename       db  "imagen2x2.txt",0
-        filename        db  "imagen3x3.txt",0
+        filename       db  "imagen2x2.txt",0
+        ;filename        db  "imagen3x3.txt",0
         ;filename       db  "imagen4x4.txt",0
 
         msgDIV          db  "------------------------------------------------------------------------",0
@@ -104,30 +104,33 @@ section .data
         msgC2           db  "c2: ",0
         msgVC1          db  "vc1: ",0
         msgVC2          db  "vc2: ",0
-        msgIndex        db  "index: ",0   
+        msgIndex        db  "indexCALC: ",0   
         msgModCol       db  "modCol: ",0
         msgModRow       db  "modRow: ",0
-        msgNewValue     db  "NewValue",0
+        msgNewValue     db  "NewValue: ",0
         msgPrueba       db  "prueba", 0    
+        msgCalcNewValue db  "Calculando nuevo valor desconocido",0
+        msgGuardaEnI    db  "Guarda en el indice: ",0
+        msgMatrixActual db  "Matriz actual antes de calcular",0
 
         new_line        db  "",  10             ; Valor de una nueva linea para imprimir
         tab             db  "",9                ; Valor de un tab para imprimir
 
         ; _____________________________ CONSTANTES _________________________________________
         
-        ; %assign FILE_SIZE               15
-        ; %assign MATRIX_SRC_SIZE         4
-        ; %assign MATRIX_OUT_SIZE         16
-        ; %assign ROW_SIZE_SRC            2
-        ; %assign ROW_SIZE_OUT            4
-        ; %assign LAST_INDEX_OUT          3
+        %assign FILE_SIZE               15
+        %assign MATRIX_SRC_SIZE         4
+        %assign MATRIX_OUT_SIZE         16
+        %assign ROW_SIZE_SRC            2
+        %assign ROW_SIZE_OUT            4
+        %assign LAST_INDEX_OUT          3
 
-        %assign FILE_SIZE               35
-        %assign MATRIX_SRC_SIZE         9
-        %assign MATRIX_OUT_SIZE         49
-        %assign ROW_SIZE_SRC            3
-        %assign ROW_SIZE_OUT            7
-        %assign LAST_INDEX_OUT          6
+        ; %assign FILE_SIZE               35
+        ; %assign MATRIX_SRC_SIZE         9
+        ; %assign MATRIX_OUT_SIZE         49
+        ; %assign ROW_SIZE_SRC            3
+        ; %assign ROW_SIZE_OUT            7
+        ; %assign LAST_INDEX_OUT          6
 
         ; %assign FILE_SIZE               63
         ; %assign MATRIX_SRC_SIZE         16
@@ -541,6 +544,36 @@ _horizontal_calc_loop:
         pop rbx
         pop rax
 
+
+        print_console msgDIV, 72
+        print_console new_line,1
+
+        print_console msgCol, 8
+        mov rax, r8
+        printRAX_push_out
+        print_console new_line,1
+
+        
+        print_console msgRow, 8
+        mov rax, r9
+        printRAX_push_out
+        print_console new_line,1
+        print_console new_line,1
+
+        print_console msgIndex,10
+        push rax
+        mov rax, r11
+        printRAX_push_out
+        print_console new_line,1
+        print_console new_line,1
+
+        pop rax
+
+        print_matrix_out
+
+
+
+
         cmp r15, 0      ; IF (col_out % 3 == 0 and row_out % 3 == 0)
 
         je      _horizontal_null_value
@@ -635,10 +668,37 @@ _put_new_value_2:
 
 _put_new_value_3:
 
+        print_console msgCalcNewValue, 34
+        print_console new_line,1
+        print_console new_line,1
+        print_console msgMatrixActual, 34
+        print_console new_line,1
+
         call _calc_interpolation        ; Calcula el valor desconocido y lo almacena en r15
+
+        print_matrix_out
+        print_console new_line,1
+
+        print_console msgNewValue, 10
+
+        mov rax, r15
+        printRAX_push_out
+        print_console new_line,1
+
+        print_console msgGuardaEnI, 21
+
+        mov rax, r10
+        printRAX_push_out
+        print_console new_line,1
+        print_console new_line,1
+
+        
 
         mov [rcx], r15w                 ; matrix_out[index_out] = r15w
                                         ; OJO: se usa r15w porque solo se ocupa 1byte
+
+        print_matrix_out
+        print_console new_line,1
 
         jmp _continue_put_new_value
 
