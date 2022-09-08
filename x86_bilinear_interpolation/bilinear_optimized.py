@@ -58,7 +58,7 @@ def calc_interpolation(c1,c2,i,vc1,vc2):
 
     result = round(r)
 
-    print("num(",i,") = ((",c2,"-",i,")/(",c2,"-",c1,"))*",vc1," + ((",i,"-",c1,")/(",c2,"-",c1,"))*",vc2,"=",result)
+    #print("num(",i,") = ((",c2,"-",i,")/(",c2,"-",c1,"))*",vc1," + ((",i,"-",c1,")/(",c2,"-",c1,"))*",vc2,"=",result)
 
     return result
 
@@ -216,7 +216,9 @@ def generate_initial_Iout(I, n_src):
     return I_out2
 
 
-def horizontal_optimized_calc(I,last_index):
+def horizontal_optimized_calc(I,row_size_out):
+
+    last_index = row_size_out-1
 
     I_out2 = I
 
@@ -225,7 +227,13 @@ def horizontal_optimized_calc(I,last_index):
 
     index = 1
 
+    vertical_known_counter_c1 = 0
+    vertical_known_counter_c2 = 3
+
+
     for c in range(len(I_out2)-1):
+
+        
         
         if(col_out%3==0 and row_out%3==0):
 
@@ -243,12 +251,39 @@ def horizontal_optimized_calc(I,last_index):
             
         
 
-        if(col_out%3!=0 and row_out%3==0):
+        if(col_out%3!=0 and row_out%3==0):  # Valores horizontales
             
 
             if(I_out2[c] == -1.0):
+                
+                I_out2[c] = calc_interpolation(c1,c2,index,vc1,vc2)
+                #print("Row: ",row_out, " Col: ", col_out)
+
+        
+        if(col_out%3==0 and row_out%3!=0): # Valores verticales
+
+            print("row_size_out: ", row_size_out)
+            print("col: ", col_out)
+            print("row: ", row_out)
+            print("index: ", index)
+            print("vertical_known_counter_c1: ", vertical_known_counter_c1)
+            print("vertical_known_counter_c2: ", vertical_known_counter_c2)
 
 
+            c1 = (col_out + 1) + vertical_known_counter_c1*row_size_out
+            vc1 = I_out2[c1-1]
+            
+            c2 = (col_out + 1) + vertical_known_counter_c2*row_size_out
+            vc2 = I_out2[c2-1]
+            
+            print()
+            print("c1: ", c1)
+            print("c2: ", c2)
+            print("vc1: ", vc1)
+            print("vc2: ", vc2)
+            print("---------------------------")
+
+            if(I_out2[c] == -1.0):
                 
                 I_out2[c] = calc_interpolation(c1,c2,index,vc1,vc2)
                 #print("Row: ",row_out, " Col: ", col_out)
@@ -256,6 +291,10 @@ def horizontal_optimized_calc(I,last_index):
         if (col_out == last_index):
             col_out = -1
             row_out = row_out +1
+            
+            if (row_out % 3 == 0):
+                vertical_known_counter_c1 = vertical_known_counter_c1 +3
+                vertical_known_counter_c2 = vertical_known_counter_c2 +3
 
         index = index + 1
 
@@ -287,11 +326,12 @@ def interpolation_optimized(I, n_src):
     print("ROW_SIZE_OUT = ", row_size_out)
 
     last_index = row_size_out-1
+    
     print("LAST_INDEX_OUT: ", last_index)
     
     print()
 
-    I_out2 = horizontal_optimized_calc(I, last_index)
+    I_out2 = horizontal_optimized_calc(I, row_size_out)
         
     return I_out2
 
@@ -359,11 +399,11 @@ def test_algorithm():
 #I_2 = np.array([10,20,30,40])
 #n_src = 2                           # Esto se lo voy a pasar al compilador yo mismo como argumento de linea de comandos
 
-I_2 = np.array([10,20,30,40,30,40,50,60,50])
-n_src = 3
+#I_2 = np.array([10,20,30,40,30,40,50,60,50])
+#n_src = 3
 
-#I_2 = np.array([10,20,30,40,30,40,50,60,50,60,70,80,70,80,90,0])
-#n_src = 4
+I_2 = np.array([10,20,30,40,30,40,50,60,50,60,70,80,70,80,90,0])
+n_src = 4
 
 I_out2 = generate_initial_Iout(I_2,n_src)
 
