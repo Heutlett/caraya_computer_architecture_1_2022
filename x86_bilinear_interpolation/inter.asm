@@ -22,9 +22,9 @@ O_RDONLY    equ 0
 SYS_EXIT    equ 60
 
 section .data
-        ;filename       db  "imagen2x2.txt",0
+        filename       db  "imagen2x2.txt",0
         ;filename       db  "imagen3x3.txt",0
-        filename       db  "imagen4x4.txt",0
+        ;filename       db  "imagen4x4.txt",0
 
         msgDIV          db  "------------------------------------------------------------------------",0
         msg1            db  "---------------------      Procesando archivo      ---------------------",10,10,"Contenido del archivo:",0
@@ -139,10 +139,10 @@ _bilinear_interpolation:
         mov [vertical_known_counter_c2], rax
 
 
-_bilinear_interpolation_calc_loop:
+_bilinear_interpolation_vertical_calc:
 
         cmp r10, MATRIX_OUT_SIZE        ; IF (index_out == MATRIX_OUT_SIZE)
-        je      _end        ; Finaliza el calculo de los valores horizontales    
+        je      _bilinear_interpolation_horizontal_calc        ; Finaliza el calculo de los valores horizontales    
 
         ; Calcula el mod de las filas y columnas
         ; Guarda en r13 = col_out%3, r14 = row_out%3, r15 = col_out%3 + row_out%3
@@ -152,17 +152,7 @@ _bilinear_interpolation_calc_loop:
         print_calc_debug                                                                ; DEBUG
 ;       ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
 
-        cmp r15, 0      ; IF (col_out % 3 == 0 and row_out % 3 == 0)
-
-        je      _set_horizontal_inter_variables
-
-_continue_set_horizontal_inter_variables:
-
-        ; Primera condicion requerida para que el index_out corresponda a un valor desconocido horizontal
-        cmp r13, 0      ; IF (col_out % 3 == 0)         
-        jne     _put_new_horizontal_value_cond
-
-_continue_put_new_horizontal_value:
+_continue_put_new_value:
 
 ;       ---------------------- vertical -------------------
         cmp r13, 0      ; IF (col_out % 3 == 0)         
@@ -179,7 +169,7 @@ _continue_new_row:
         inc r10         ; index_out = index_out + 1
         inc r11         ; indexCALC = indexCALC + 1
 
-        jmp _bilinear_interpolation_calc_loop
+        jmp _bilinear_interpolation_vertical_calc
 
 _new_row:
 
@@ -207,36 +197,6 @@ _increase_vertical_known_counters:
 
         jmp _continue_new_row
 
-
-_set_horizontal_inter_variables:
-
-        ; Se asignan los valores a las variables usadas en la formula de interpolacion
-        calc_horizontal_interpolation_variables
-
-        jmp _continue_set_horizontal_inter_variables
-
-;       _________________________________________________________________________________________
-;       Para que el indice actual de matrix_out corresponda a un valor desconocido horizontal
-;       se debe cumplir la siguiente condicion: IF (col_out % 3 != 0 and row_out % 3 == 0)
-;       si se llego hasta aqui ya se cumplio la primera condicion (col_out % 3 != 0)
-_put_new_horizontal_value_cond:
-
-        cmp r14, 0              ; IF (row_out % 3 == 0)
-        je _put_new_horizontal_value     ; Se cumple la segunda condicion
-
-        jmp _continue_put_new_horizontal_value
-
-_put_new_horizontal_value:
-
-        ;       Almacena en rax el valor de matrix_out[r10] y en rcx el puntero
-        get_value_and_pointer_matrix_out r10
-
-        ; Esta condicion se debe cambiar, debe ser == -1
-        cmp rax, 0              ; IF (matrix_out[index_out] == 0)
-        je _put_new_value     ; Si se cumple significa que es un valor desconocido que se debe calcular
-
-        jmp _continue_put_new_horizontal_value
-
 _put_new_value:
 
         print_console msg6, 31
@@ -256,7 +216,7 @@ _put_new_value:
         print_console new_line,1
 ;       ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
 
-        jmp _continue_put_new_horizontal_value
+        jmp _continue_put_new_value
 
 ;       _________________________________________________________________________________________
 ;                       Se inicia el calculo de los valores horizontales
@@ -284,6 +244,114 @@ _put_new_vertical_value:
 
 
         jmp _continue_put_new_vertical_value
+
+
+;       Calcula los valores horizontales desconocidos
+_bilinear_interpolation_horizontal_calc:
+
+        mov rbx, matrix_out     ; Puntero a matrix_out
+
+        mov r8, 0               ; col_out
+        mov r9, 0               ; row_out
+
+        mov r10, 0              ; index_out = c
+        mov r11, 1              ; indexCALC
+
+_bilinear_interpolation_calc_loop:
+
+        cmp r10, MATRIX_OUT_SIZE        ; IF (index_out == MATRIX_OUT_SIZE)
+        je      _end        ; Finaliza el calculo de los valores horizontales    
+
+        ; Calcula el mod de las filas y columnas
+        ; Guarda en r13 = col_out%3, r14 = row_out%3, r15 = col_out%3 + row_out%3
+        mod_col_row r8,r9
+
+;       ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+        ;print_calc_debug                                                                ; DEBUG
+;       ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+
+        cmp r13, 0      ; IF (col_out % 3 == 0 and row_out % 3 == 0)
+
+        je      _set_horizontal_inter_variables
+
+_continue_set_horizontal_inter_variables:
+
+        ; Primera condicion requerida para que el index_out corresponda a un valor desconocido horizontal
+        cmp r13, 0      ; IF (col_out % 3 != 0)         
+        jne     _put_new_horizontal_value
+
+_continue_put_new_horizontal_value:
+
+        cmp r8, LAST_INDEX_OUT          ; IF (col_out == LAST_INDEX_OUT)
+        je      _new_row_horizontal     ; Se desplaza una fila adelante
+
+_continue_new_row_horizontal:
+
+        inc r8          ; col_out = col_out + 1
+        inc r10         ; index_out = index_out + 1
+        inc r11         ; indexCALC = indexCALC + 1
+
+        jmp _bilinear_interpolation_calc_loop
+
+_new_row_horizontal:
+
+        mov r8, -1      ; col_out = -1
+        inc r9          ; row_out = row_out + 1
+
+        mod_col_row r8,r9
+
+        jmp _continue_new_row_horizontal
+
+
+_set_horizontal_inter_variables:
+
+        ; Se asignan los valores a las variables usadas en la formula de interpolacion
+        calc_horizontal_interpolation_variables
+
+        jmp _continue_set_horizontal_inter_variables
+
+;       _________________________________________________________________________________________
+;       Para que el indice actual de matrix_out corresponda a un valor desconocido horizontal
+;       se debe cumplir la siguiente condicion: IF (col_out % 3 != 0 and row_out % 3 == 0)
+;       si se llego hasta aqui ya se cumplio la primera condicion (col_out % 3 != 0)
+_put_new_horizontal_value_cond:
+
+        cmp r14, 0              ; IF (row_out % 3 == 0)
+        je _put_new_horizontal_value     ; Se cumple la segunda condicion
+
+        jmp _continue_put_new_horizontal_value
+
+_put_new_horizontal_value:
+
+        ;       Almacena en rax el valor de matrix_out[r10] y en rcx el puntero
+        get_value_and_pointer_matrix_out r10
+
+        ; Esta condicion se debe cambiar, debe ser == -1
+        cmp rax, 0              ; IF (matrix_out[index_out] == 0)
+        je _put_new_value_horizontal     ; Si se cumple significa que es un valor desconocido que se debe calcular
+
+        jmp _continue_put_new_horizontal_value
+
+_put_new_value_horizontal:
+
+        print_console msg6, 31
+        print_console new_line,1
+
+;       ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+        print_calc_debug2                                                    ; DEBUG
+;       ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+
+        ;       Inserta un nuevo valor a matrix_out
+        ;       input: rcx  = index_out desplazado
+        ;              r15w = entero a insertar
+        insert_new_value_into_matrix_out
+
+;       ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+        print_matrix_out                                                                ; DEBUG
+        print_console new_line,1
+;       ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+
+        jmp _continue_put_new_horizontal_value
 
 _end:
 
