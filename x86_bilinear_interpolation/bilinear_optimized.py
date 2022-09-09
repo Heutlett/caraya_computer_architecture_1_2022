@@ -268,7 +268,7 @@ def horizontal_optimized_calc(I,row_size_out):
             print("index: ", index)
             print("vertical_known_counter_c1: ", vertical_known_counter_c1)
             print("vertical_known_counter_c2: ", vertical_known_counter_c2)
-
+            print("row_size_out: ",row_size_out )
 
             c1 = (col_out + 1) + vertical_known_counter_c1*row_size_out
             vc1 = I_out2[c1-1]
@@ -282,6 +282,8 @@ def horizontal_optimized_calc(I,row_size_out):
             print("vc1: ", vc1)
             print("vc2: ", vc2)
             print("---------------------------")
+
+            return
 
             if(I_out2[c] == -1.0):
                 
@@ -396,14 +398,14 @@ def test_algorithm():
 
 
 
-#I_2 = np.array([10,20,30,40])
-#n_src = 2                           # Esto se lo voy a pasar al compilador yo mismo como argumento de linea de comandos
+I_2 = np.array([10,20,30,40])
+n_src = 2                           # Esto se lo voy a pasar al compilador yo mismo como argumento de linea de comandos
 
 #I_2 = np.array([10,20,30,40,30,40,50,60,50])
 #n_src = 3
 
-I_2 = np.array([10,20,30,40,30,40,50,60,50,60,70,80,70,80,90,0])
-n_src = 4
+#I_2 = np.array([10,20,30,40,30,40,50,60,50,60,70,80,70,80,90,0])
+#n_src = 4
 
 I_out2 = generate_initial_Iout(I_2,n_src)
 

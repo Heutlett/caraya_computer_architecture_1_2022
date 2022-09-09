@@ -13,7 +13,7 @@
 ;       input:  %1 = index_out
 ;       output: rax = matrix_out[%1]
 ;               rcx = puntero al valor de rax en matrix_out 
-%macro get_and_value_pointer_matrix_out 1
+%macro get_value_and_pointer_matrix_out 1
 
         mov rax, %1            ; %1 = index_out
         shl rax, 2              ; Se alinea el indice
@@ -129,11 +129,75 @@
 %endmacro
 
 ;       _________________________________________________________________________________________
+;       Calcula y setea las variables de la formula de interpolacion para pixeles verticales
+;       input:  r8 = col_out
+;       output: sin salidas
+%macro calc_vertical_interpolation_variables 0
+
+        ; r11 = indexCALC : es el mismo indice index_out pero +1
+
+        ; c1 = (col_out + 1) + vertical_known_counter_c1*ROW_SIZE_OUT   | Indice conocido 1
+        ; c2 = (col_out + 1) + vertical_known_counter_c2*ROW_SIZE_OUT   | Indice conocido 2
+        ; vc1 = matrix_out[c1-1]        | Valor conocido 1
+        ; vc2 = matrix_out[c2-1]        | Valor conocido 2
+
+        push rbx
+        push rcx
+        push rdx
+
+        prueba2:
+
+        mov rax, [vertical_known_counter_c1]    ; rax = vertical_known_counter_c1
+        mov rbx, ROW_SIZE_OUT                   ; rbx = ROW_SIZE_OUT
+        mul rbx                        ; rax = vertical_known_counter_c1*ROW_SIZE_OUT
+
+        
+
+        add rax, r8     ; rax = rax + col_out
+        add rax, 1      ; rax = rax + 1
+
+        mov rbx, rax    ; rbx = c1 = (col_out + 1) + vertical_known_counter_c1*ROW_SIZE_OUT
+
+        
+
+        prueba3:
+
+        sub rax, 1
+        shl rax, 2
+        add rax, matrix_out            
+        mov rax, [rax]  ; rax = matrix_out[c1-1]          
+        mov rcx, rax    ; rcx = vc1 = matrix_out[c1-1]
+
+        mov rax, [vertical_known_counter_c2]    ; rax = vertical_known_counter_c2
+        mov rdx, ROW_SIZE_OUT                   ; rdx = ROW_SIZE_OUT
+        mul rdx                                 ; rax = vertical_known_counter_c2*ROW_SIZE_OUT
+
+        add rax, r8     ; rax = rax + col_out
+        add rax, 1      ; rax = rax + 1
+
+        mov rdx, rax    ; rdx = c2 = (col_out + 1) + vertical_known_counter_c2*ROW_SIZE_OUT
+
+        sub rax, 1      ; rax = c2 - 1
+        shl rax, 2
+        add rax, matrix_out            
+        mov rax, [rax]  ; rax = matrix_out[c2-1]        
+
+        update_interpolation_variables rbx, rcx, rdx, rax
+
+        pop rdx
+        pop rcx
+        pop rbx
+
+%endmacro
+
+;       _________________________________________________________________________________________
 ;       Inserta un nuevo valor a la matriz de salida
 ;       input:  rcx     = index_out
 ;               r15w    = int
 ;       output: sin salidas
 %macro insert_new_value_into_matrix_out 0
+
+        call calc_interpolation        ; Calcula el valor desconocido y lo almacena en r15
 
         print_console msgNewValue, 10
         push rax
@@ -142,8 +206,6 @@
         print_console new_line,1
         print_console new_line,1
         pop rax
-
-        call calc_interpolation        ; Calcula el valor desconocido y lo almacena en r15
 
         mov [rcx], r15w                 ; matrix_out[index_out] = r15w
                                         ; OJO: se usa r15w porque solo se ocupa 1byte

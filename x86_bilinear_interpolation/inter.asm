@@ -63,6 +63,9 @@ section .bss
         vc1             resb    8       ; Variable para guardar el contenido del valor conocido 1
         vc2             resb    8       ; Variable para guardar el contenido del valor conocido 2
 
+        vertical_known_counter_c1 resb 8
+        vertical_known_counter_c2 resb 8
+
         matrix_src       resb    100     ; Arreglo de elementos de la imagen
         matrix_out       resd    16      ; Arreglo de salida
 
@@ -128,6 +131,14 @@ _bilinear_interpolation:
         mov r10, 0              ; index_out = c
         mov r11, 1              ; indexCALC
 
+        ;       Inicializa contadores de posicion de valores conocidos
+        ;       para calculo vertical
+        mov rax, 0
+        mov [vertical_known_counter_c1], rax
+        mov rax, 3
+        mov [vertical_known_counter_c2], rax
+
+
 _bilinear_interpolation_calc_loop:
 
         cmp r10, MATRIX_OUT_SIZE        ; IF (index_out == MATRIX_OUT_SIZE)
@@ -154,6 +165,7 @@ _continue_set_horizontal_inter_variables:
 _continue_put_new_horizontal_value:
 
 ;       ---------------------- vertical -------------------
+        cmp r13, 0      ; IF (col_out % 3 == 0)         
         je     _put_new_vertical_value_cond
 
 _continue_put_new_vertical_value:
@@ -174,7 +186,27 @@ _new_row:
         mov r8, -1      ; col_out = -1
         inc r9          ; row_out = row_out + 1
 
+        mod_col_row r8,r9
+
+        cmp r14, 0      ; IF (row_out % 3 == 0)
+        je      _increase_vertical_known_counters
+
         jmp _continue_new_row
+
+_increase_vertical_known_counters:
+
+        push rax
+        mov rax, [vertical_known_counter_c1]
+        add rax, 3
+        mov [vertical_known_counter_c1], rax
+
+        mov rax, [vertical_known_counter_c2]
+        add rax, 3
+        mov [vertical_known_counter_c2], rax
+        pop rax
+
+        jmp _continue_new_row
+
 
 _set_horizontal_inter_variables:
 
@@ -197,7 +229,7 @@ _put_new_horizontal_value_cond:
 _put_new_horizontal_value:
 
         ;       Almacena en rax el valor de matrix_out[r10] y en rcx el puntero
-        get_and_value_pointer_matrix_out r10
+        get_value_and_pointer_matrix_out r10
 
         ; Esta condicion se debe cambiar, debe ser == -1
         cmp rax, 0              ; IF (matrix_out[index_out] == 0)
@@ -230,34 +262,30 @@ _put_new_value:
 ;                       Se inicia el calculo de los valores horizontales
 _put_new_vertical_value_cond:
 
+        prueba1:
         cmp r14, 0                              ; IF (row_out % 3 != 0)
         jne _put_new_vertical_value             ; Se cumple la segunda condicion
+
 
         jmp _continue_put_new_vertical_value    ; No se cumple la segunda condicion
 
 _put_new_vertical_value:
 
+        calc_vertical_interpolation_variables
+
+        
+
         ;       Almacena en rax el valor de matrix_out[r10] y en rcx el puntero
-        get_and_value_pointer_matrix_out r10
-
-        print_console msgPrueba,5
-        print_console msgPrueba,5
-        print_console new_line,1
-
-        printRAX_push_out
+        get_value_and_pointer_matrix_out r10
 
         ; Esta condicion se debe cambiar, debe ser == -1
         cmp rax, 0              ; IF (matrix_out[index_out] == 0)
         je _put_new_value     ; Si se cumple significa que es un valor desconocido que se debe calcular
-        
-        print_console new_line,1
-        print_console msgPrueba,5
-        print_console msgPrueba,5
+
 
         jmp _continue_put_new_vertical_value
 
 _end:
-
 
         mov rax, msg5
         call print_string
