@@ -1,0 +1,31 @@
+nasm -felf64 -o read_file.o read_file.asm
+ld -o read_file read_file.o
+gdb read_file
+
+b _end
+r
+p /x (char[11])text
+
+
+nasm -felf64 -o inter.o inter.asm
+ld -o inter inter.o
+./inter
+
+gdb inter
+
+b _end
+r
+p /x (char[15])text
+p /d (char[16])array_out
+
+nasm -felf64 -o mod.o mod.asm
+ld -o mod mod.o
+gdb mod
+
+nasm -felf64 -o div.o div.asm
+ld -o div div.o
+gdb div
+
+nasm -felf64 -o address.o address.asm
+ld -o address address.o
+gdb address
