@@ -145,22 +145,14 @@
         push rcx
         push rdx
 
-        prueba2:
-
         mov rax, [vertical_known_counter_c1]    ; rax = vertical_known_counter_c1
         mov rbx, ROW_SIZE_OUT                   ; rbx = ROW_SIZE_OUT
         mul rbx                        ; rax = vertical_known_counter_c1*ROW_SIZE_OUT
-
-        
 
         add rax, r8     ; rax = rax + col_out
         add rax, 1      ; rax = rax + 1
 
         mov rbx, rax    ; rbx = c1 = (col_out + 1) + vertical_known_counter_c1*ROW_SIZE_OUT
-
-        
-
-        prueba3:
 
         sub rax, 1
         shl rax, 2
@@ -199,12 +191,12 @@
 
         call calc_interpolation        ; Calcula el valor desconocido y lo almacena en r15
 
-        print_console msgNewValue, 10
-        push rax
-        mov rax, r15
-        printRAX_push_out
-        print_console new_line,1
-        print_console new_line,1
+        ; print_console msgNewValue, 10
+        ; push rax
+        ; mov rax, r15
+        ; printRAX_push_out
+        ; print_console new_line,1
+        ; print_console new_line,1
         pop rax
 
         mov [rcx], r15w                 ; matrix_out[index_out] = r15w

@@ -149,7 +149,7 @@ _bilinear_interpolation_vertical_calc:
         mod_col_row r8,r9
 
 ;       ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
-        print_calc_debug                                                                ; DEBUG
+        ;print_calc_debug                                                                ; DEBUG
 ;       ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
 
 _continue_put_new_value:
@@ -199,11 +199,12 @@ _increase_vertical_known_counters:
 
 _put_new_value:
 
-        print_console msg6, 31
-        print_console new_line,1
+        
 
 ;       ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
-        print_calc_debug2                                                    ; DEBUG
+        ;print_console msg6, 31
+        ;print_console new_line,1
+        ;print_calc_debug2                                                    ; DEBUG
 ;       ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
 
         ;       Inserta un nuevo valor a matrix_out
@@ -212,8 +213,8 @@ _put_new_value:
         insert_new_value_into_matrix_out
 
 ;       ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
-        print_matrix_out                                                                ; DEBUG
-        print_console new_line,1
+        ;print_matrix_out                                                                ; DEBUG
+        ;print_console new_line,1
 ;       ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
 
         jmp _continue_put_new_value
@@ -222,7 +223,6 @@ _put_new_value:
 ;                       Se inicia el calculo de los valores horizontales
 _put_new_vertical_value_cond:
 
-        prueba1:
         cmp r14, 0                              ; IF (row_out % 3 != 0)
         jne _put_new_vertical_value             ; Se cumple la segunda condicion
 
@@ -232,8 +232,6 @@ _put_new_vertical_value_cond:
 _put_new_vertical_value:
 
         calc_vertical_interpolation_variables
-
-        
 
         ;       Almacena en rax el valor de matrix_out[r10] y en rcx el puntero
         get_value_and_pointer_matrix_out r10
@@ -334,11 +332,12 @@ _put_new_horizontal_value:
 
 _put_new_value_horizontal:
 
-        print_console msg6, 31
-        print_console new_line,1
+
 
 ;       ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
-        print_calc_debug2                                                    ; DEBUG
+        ;print_console msg6, 31
+        ;print_console new_line,1
+        ;print_calc_debug2                                                    ; DEBUG
 ;       ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
 
         ;       Inserta un nuevo valor a matrix_out
@@ -347,8 +346,8 @@ _put_new_value_horizontal:
         insert_new_value_into_matrix_out
 
 ;       ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
-        print_matrix_out                                                                ; DEBUG
-        print_console new_line,1
+        ;print_matrix_out                                                                ; DEBUG
+        ;print_console new_line,1
 ;       ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
 
         jmp _continue_put_new_horizontal_value
