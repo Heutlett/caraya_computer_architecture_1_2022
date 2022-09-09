@@ -22,9 +22,11 @@ O_RDONLY    equ 0
 SYS_EXIT    equ 60
 
 section .data
-        filename       db  "imagen2x2.txt",0
+        ;filename       db  "imagen2x2.txt",0
         ;filename       db  "imagen3x3.txt",0
-        ;filename       db  "imagen4x4.txt",0
+        filename       db  "imagen4x4.txt",0
+        ;filename       db  "imagen97x97.txt",0
+        ;filename       db  "imagen30x30.txt",0
 
         msgDIV          db  "------------------------------------------------------------------------",0
         msg1            db  "---------------------      Procesando archivo      ---------------------",10,10,"Contenido del archivo:",0
@@ -51,9 +53,17 @@ section .data
         new_line        db  "",  10             ; Valor de una nueva linea para imprimir
         tab             db  "",9                ; Valor de un tab para imprimir
         
+        matrix_out       TIMES MATRIX_OUT_SIZE dd 0      ; Arreglo de salida
+        
+
+        matrix_src       TIMES MATRIX_SRC_SIZE db 0    ;     ; Arreglo de elementos de la imagen
+
+        
+
+        
 
 section .bss
-        text            resb    100     ; Contenido del texto leido del archivo
+        text            resb    FILE_SIZE     ; Contenido del texto leido del archivo
 
         digitSpace      resb    100     ; Variables usadas para leer numeros enteros
         digitSpacePos   resb    8
@@ -66,8 +76,12 @@ section .bss
         vertical_known_counter_c1 resb 8
         vertical_known_counter_c2 resb 8
 
-        matrix_src       resb    100     ; Arreglo de elementos de la imagen
-        matrix_out       resd    16      ; Arreglo de salida
+        ; matrix_src       resb    MATRIX_SRC_SIZE     ; Arreglo de elementos de la imagen
+
+        ; matrix_out       resd    MATRIX_OUT_SIZE      ; Arreglo de salida
+
+        
+        
 
 section .text
         global _start
