@@ -276,9 +276,39 @@ class Interfaz(ttk.Frame):
         
         self.arrayImgSelect = result
 
+        print("Se ha generado la matriz que va para assembly")
+
+
+    def generate_img_file(self):
+
+        file = open("img_src.img","w") 
+ 
+        for r in range(len(self.arrayImgSelect)):
+
+            for c in range(len(self.arrayImgSelect[r])):
+
+                num = self.arrayImgSelect[r][c]
+
+                if (num < 10):
+                    num = "00" + str(num)
+                elif(num < 100):
+                    num = "0" + str(num)
+                else:
+                    num = str(num)
+            
+                file.write(num)
+                file.write(" ")
+        
+        file.close() 
+
+        print("Se ha generado el archivo img que se utilizara en assembly")
+
 
 
     def fun_ejecutar_interpolacion(self):
+
+        self.generate_img_file()
+        
         
         if(self.entry_var.get() != "" and self.loaded and self.quad_selected):
 
