@@ -22,9 +22,9 @@ O_RDONLY    equ 0
 SYS_EXIT    equ 60
 
 section .data
-        filename       db  "imagen2x2.txt",0
+        ;filename       db  "imagen2x2.txt",0
         ;filename       db  "imagen3x3.txt",0
-        ;filename       db  "imagen4x4.txt",0
+        filename       db  "imagen4x4.txt",0
 
         msgDIV          db  "------------------------------------------------------------------------",0
         msg1            db  "---------------------      Procesando archivo      ---------------------",10,10,"Contenido del archivo:",0

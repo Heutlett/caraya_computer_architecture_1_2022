@@ -64,110 +64,6 @@ def calc_interpolation(c1,c2,i,vc1,vc2):
 
 
 
-#   Calcula los pixeles centrales
-#   parametros:     n:      tamano de la fila
-#                   index:  indice del primer valor a calcular de la fila
-#                   I:      matriz
-#                   r:      fila
-def middle_pixels(n,index,I,r,m):
-
-    mid = []
-
-    ind = index
-
-    for i in range(n):      # Pixeles verticales
-        
-        if (i%3==0):        
-
-            c1 = r*n+i+1                # indice conocido 1
-            c2 = (r+3)*n+i+1            # indice conocido 2
-
-            vc1 = I[r][i//3]            # valor del conocido1
-            vc2 = I[r+1][i//3]          # valor del conocido2
-
-            #print("c1: ",c1)
-            #print("c2: ",c2)
-            #print("index: ",index)
-            #print("vc1: ",vc1)
-            #print("vc2: ",vc2)
-
-            #print("\n> Pixeles verticales (c,g,f,j)\n")
-
-            mid.append(calc_interpolation(c1,c2,ind,vc1,vc2)) #c y g
-            
-            ind = ind +3
-        else:
-            mid.append(-1)
-
-    for i in range(len(mid)-1):     # Pixeles del centro
-
-        if (i%3==0 & i<len(mid)-1):
-            
-            c1 = (r+1+m)*n+(i+1)
-            vc1 = mid[i]
-
-            c2 = c1 + 3
-            vc2 = mid[i+3]
-
-        if(mid[i]==-1):
-
-            ind = index+i
-
-            #print("c1: ",c1)
-            #print("c2: ",c2)
-            #print("ind: ",ind)
-            #print("vc1: ",vc1)
-            #print("vc2: ",vc2)
-
-            #print("\n> Pixeles intermedios (d,e,h,i)\n")
-            
-            mid[i] = calc_interpolation(c1,c2,ind,vc1,vc2)
-
-    return mid
-
-def bilinear_interpolation(I):
-
-    I_out = []                      #   Imagen interpolada
-    for r in range(len(I)):
-        I_new = []               #   Espacios superiores e inferiores
-        for c in range(len(I[r])):   
-
-            I_new.append(I[r][c])
-
-            if(c < len(I[r])-1):
-                
-                c1 = (c) + 1                # indice conocido 1
-                c2 = (c + 3) + 1            # indice conocido 2
-                ai = (c + 1) + 1            # indice de a
-                bi = (c + 2) + 1            # indice de a
-                vc1 = I[r][c]               # valor del conocido1
-                vc2 = I[r][c+1]             # valor del conocido2
-
-                #print("c1: ",c1)
-                #print("c2: ",c2)
-                #print("ai: ",ai)
-                #print("vc1: ",vc1)
-                #print("vc2: ",vc2)
-
-                #print("\n> Pixeles horizontales (a,b,k,l)\n")
-
-                I_new.append(calc_interpolation(c1,c2,ai,vc1,vc2))      #a
-                I_new.append(calc_interpolation(c1,c2,bi,vc1,vc2))      #b
-                
-        I_out.append(I_new)
-
-        if(r < len(I[r])-1):
-            
-            n = 4 + (len(I[r])-2)*3
-
-            index1 = (r+1)*n+1
-            index2 = (r+2)*n+1
-            
-            I_out.append(middle_pixels(n,index1,I,r,0))     #c
-            I_out.append(middle_pixels(n,index2,I,r,1))     #g
-
-    return I_out
-
 # Genera la matriz inicial con el tamano final y los valores conocidos colocados, los no conocidos se ponen -1
 
 def fill_null_values(I):
@@ -216,7 +112,7 @@ def generate_initial_Iout(I, n_src):
     return I_out2
 
 
-def horizontal_optimized_calc(I,row_size_out):
+def vertical_optimized_calc(I,row_size_out):
 
     last_index = row_size_out-1
 
@@ -237,6 +133,8 @@ def horizontal_optimized_calc(I,row_size_out):
         
         if(col_out%3==0 and row_out%3==0):
 
+            # Variables para horizontales
+
             c1 = index 
             vc1 = I_out2[c1-1]
             c2 = index + 3
@@ -252,13 +150,13 @@ def horizontal_optimized_calc(I,row_size_out):
         
         if(col_out%3==0 and row_out%3!=0): # Valores verticales
 
-            print("row_size_out: ", row_size_out)
-            print("col: ", col_out)
-            print("row: ", row_out)
-            print("index: ", index)
-            print("vertical_known_counter_c1: ", vertical_known_counter_c1)
-            print("vertical_known_counter_c2: ", vertical_known_counter_c2)
-            print("row_size_out: ",row_size_out )
+            # print("row_size_out: ", row_size_out)
+            # print("col: ", col_out)
+            # print("row: ", row_out)
+            # print("index: ", index)
+            # print("vertical_known_counter_c1: ", vertical_known_counter_c1)
+            # print("vertical_known_counter_c2: ", vertical_known_counter_c2)
+            # print("row_size_out: ",row_size_out )
 
             c1 = (col_out + 1) + vertical_known_counter_c1*row_size_out
             vc1 = I_out2[c1-1]
@@ -266,12 +164,12 @@ def horizontal_optimized_calc(I,row_size_out):
             c2 = (col_out + 1) + vertical_known_counter_c2*row_size_out
             vc2 = I_out2[c2-1]
             
-            print()
-            print("c1: ", c1)
-            print("c2: ", c2)
-            print("vc1: ", vc1)
-            print("vc2: ", vc2)
-            print("---------------------------")
+            # print()
+            # print("c1: ", c1)
+            # print("c2: ", c2)
+            # print("vc1: ", vc1)
+            # print("vc2: ", vc2)
+            # print("---------------------------")
 
             if(I_out2[c] == -1.0):
                 
@@ -279,13 +177,13 @@ def horizontal_optimized_calc(I,row_size_out):
                 #print("Row: ",row_out, " Col: ", col_out)
         
 
-        if(col_out%3!=0 and row_out%3==0):  # Valores horizontales
+        # if(col_out%3!=0 and row_out%3==0):  # Valores horizontales
             
 
-            if(I_out2[c] == -1.0):
+        #     if(I_out2[c] == -1.0):
                 
-                I_out2[c] = calc_interpolation(c1,c2,index,vc1,vc2)
-                #print("Row: ",row_out, " Col: ", col_out)
+        #         I_out2[c] = calc_interpolation(c1,c2,index,vc1,vc2)
+        #         #print("Row: ",row_out, " Col: ", col_out)
 
 
         if (col_out == last_index):
@@ -295,6 +193,65 @@ def horizontal_optimized_calc(I,row_size_out):
             if (row_out % 3 == 0):
                 vertical_known_counter_c1 = vertical_known_counter_c1 +3
                 vertical_known_counter_c2 = vertical_known_counter_c2 +3
+
+        index = index + 1
+
+        col_out = col_out + 1
+
+        
+    return I_out2
+
+
+
+def horizontal_optimized_calc(I,row_size_out):
+
+    print("CALCULO HORIZONTAL")
+    printerArray(I,4)
+
+    last_index = row_size_out-1
+
+    I_out2 = I
+
+    col_out = 0
+    row_out = 0
+
+    index = 1
+
+
+    for c in range(len(I_out2)-1):
+
+        
+        if(col_out%3==0):
+
+            # Variables para horizontales
+
+            c1 = index 
+            vc1 = I_out2[c1-1]
+            c2 = index + 3
+            vc2 = I_out2[c2-1]
+
+            print("---------------")
+            print("Row: ",row_out, " Col: ", col_out)
+            print("index: ",index)
+            print("c1: ", c1)
+            print("c2: ", c2)
+            print("vc1: ", vc1)
+            print("vc2: ", vc2)
+            
+
+        if(col_out%3!=0):  # Valores horizontales
+            
+
+            if(I_out2[c] == -1.0):
+                
+                I_out2[c] = calc_interpolation(c1,c2,index,vc1,vc2)
+                print("Row: ",row_out, " Col: ", col_out)
+
+
+        if (col_out == last_index):
+            col_out = -1
+            row_out = row_out +1
+            
 
         index = index + 1
 
@@ -331,7 +288,8 @@ def interpolation_optimized(I, n_src):
     
     print()
 
-    I_out2 = horizontal_optimized_calc(I, row_size_out)
+    I_out2 = vertical_optimized_calc(I, row_size_out)
+    I_out2 = horizontal_optimized_calc(I_out2, row_size_out)
         
     return I_out2
 
@@ -351,31 +309,31 @@ def interpolation_optimized(I, n_src):
 #     return result
 
 
-def test_algorithm():
+# def test_algorithm():
 
-    I = [[10,20,30,40],[30,40,50,60],[50,60,70,80], [70,80,90,0]]           #   Imagen inicial
+#     I = [[10,20,30,40],[30,40,50,60],[50,60,70,80], [70,80,90,0]]           #   Imagen inicial
 
 
-    I_out = bilinear_interpolation(I)
+#     I_out = interpolation_optimized(I)
 
-    I_test = [[10,13,17,20,23,27,30,33,37,40],
-            [17,20,24,27,30,34,37,40,44,47],
-            [23,26,30,33,36,40,43,46,50,53],
-            [30,33,37,40,43,47,50,53,57,60],
-            [37,40,44,47,50,54,57,60,64,67],
-            [43,46,50,53,56,60,63,66,70,73],
-            [50,53,57,60,63,67,70,73,77,80],
-            [57,60,64,67,70,74,77,69,61,53],
-            [63,66,70,73,76,80,83,64,46,27],
-            [70,73,77,80,83,87,90,60,30,0]]
+#     I_test = [[10,13,17,20,23,27,30,33,37,40],
+#             [17,20,24,27,30,34,37,40,44,47],
+#             [23,26,30,33,36,40,43,46,50,53],
+#             [30,33,37,40,43,47,50,53,57,60],
+#             [37,40,44,47,50,54,57,60,64,67],
+#             [43,46,50,53,56,60,63,66,70,73],
+#             [50,53,57,60,63,67,70,73,77,80],
+#             [57,60,64,67,70,74,77,69,61,53],
+#             [63,66,70,73,76,80,83,64,46,27],
+#             [70,73,77,80,83,87,90,60,30,0]]
 
-    if (I_test == I_out):
+#     if (I_test == I_out):
 
-        print("EXITO:   El algoritmo funciona correctamente")
+#         print("EXITO:   El algoritmo funciona correctamente")
 
-    else: 
+#     else: 
         
-        print("ERROR:   El algoritmo tiene errores")
+#         print("ERROR:   El algoritmo tiene errores")
 
         
 
