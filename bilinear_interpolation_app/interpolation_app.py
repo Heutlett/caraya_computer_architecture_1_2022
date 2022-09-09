@@ -11,6 +11,8 @@ import os
 from bilinear_interpolation import *
 from img_tools import *
 from drawer import *
+import os
+from optimized_final import *
 
 
 class Interfaz(ttk.Frame):
@@ -40,6 +42,7 @@ class Interfaz(ttk.Frame):
     arrayImgSrc = []
     arraySrcQuadrants = []
     arrayImgSelect = []
+    arrayAssembly = []
     
 
     imgSrcDimensions = 390
@@ -281,13 +284,14 @@ class Interfaz(ttk.Frame):
 
     def generate_img_file(self):
 
-        file = open("img_src.img","w") 
+        file = open("assembly_bilinear_interpolation/img_src.img","w") 
  
         for r in range(len(self.arrayImgSelect)):
 
             for c in range(len(self.arrayImgSelect[r])):
 
                 num = self.arrayImgSelect[r][c]
+                self.arrayAssembly.append (num)
 
                 if (num < 10):
                     num = "00" + str(num)
@@ -301,13 +305,45 @@ class Interfaz(ttk.Frame):
         
         file.close() 
 
+        self.arrayAssembly = np.array(self.arrayAssembly)
+
         print("Se ha generado el archivo img que se utilizara en assembly")
+
+        #self.execute_assembly_bilinear_interpolation()
+
+    def convert_img_array_to_matrix(self, I,row_size):
+
+        array = []
+        c = 1
+
+        row = []
+
+        for i in range(len(I)):
+
+            row.append(int(I[i]))
+            
+            if (c == row_size):
+                array.append(row)
+                row = []
+                c = -1
+
+            c = c + 1
+
+        return array
+
+    def execute_assembly_bilinear_interpolation(self):
+
+        os.system('assembly_bilinear_interpolation/./inter')
 
 
 
     def fun_ejecutar_interpolacion(self):
 
         self.generate_img_file()
+
+        n = len(self.arrayImgSelect[0])
+
+        print("El tamano de la matriz es: ", str(n))
         
         
         if(self.entry_var.get() != "" and self.loaded and self.quad_selected):
@@ -315,7 +351,18 @@ class Interfaz(ttk.Frame):
             imgOut = "result.jpg"
 
             #arrayImgOut = convert_img_txt(self.arrayImgSrc)
+
+
+            #   Este es el que sirve con algoritmo de python
             arrayImgOut = bilinear_interpolation(self.arrayImgSelect)
+
+            
+            #arrayImgOut = execute(self.arrayAssembly,n)
+
+            #arrayImgOut = execute(np.array([10,20,30,40]),30)
+
+            #arrayImgOut = self.convert_img_array_to_matrix(arrayImgOut,30)
+
             self.imgOutDimensions = len(arrayImgOut)
 
             print("Size out img: ", self.imgOutDimensions, "x", self.imgOutDimensions)
