@@ -8,7 +8,7 @@ def printer(array2d):
 
     for row in array2d:
         for col in row:
-            print(col, "\t\t", sep="", end="")
+            print(col, "\t", sep="", end="")
 
         print()
 

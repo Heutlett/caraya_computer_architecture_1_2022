@@ -22,7 +22,7 @@
         mov rcx,rax             ; Se guarda en rcx el puntero para usarlo posteriormente
 
         mov rax, [rax]          ; rax = matrix_out[index_out]
-        and rax, MASK
+        and rax, MASK2
 
 %endmacro
 

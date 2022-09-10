@@ -1,4 +1,5 @@
 
+from array import array
 from cgitb import enable
 import tkinter as tk
 from tkinter import ttk
@@ -12,6 +13,7 @@ from bilinear_interpolation import *
 from img_tools import *
 from drawer import *
 import os
+import time
 from optimized_final import *
 
 
@@ -291,7 +293,7 @@ class Interfaz(ttk.Frame):
             for c in range(len(self.arrayImgSelect[r])):
 
                 num = self.arrayImgSelect[r][c]
-                self.arrayAssembly.append (num)
+                #self.arrayAssembly.append (num)
 
                 if (num < 10):
                     num = "00" + str(num)
@@ -305,11 +307,11 @@ class Interfaz(ttk.Frame):
         
         file.close() 
 
-        self.arrayAssembly = np.array(self.arrayAssembly)
+        #self.arrayAssembly = np.array(self.arrayAssembly)
 
         print("Se ha generado el archivo img que se utilizara en assembly")
 
-        #self.execute_assembly_bilinear_interpolation()
+        self.execute_assembly_bilinear_interpolation()
 
     def convert_img_array_to_matrix(self, I,row_size):
 
@@ -325,7 +327,7 @@ class Interfaz(ttk.Frame):
             if (c == row_size):
                 array.append(row)
                 row = []
-                c = -1
+                c = 0
 
             c = c + 1
 
@@ -335,11 +337,43 @@ class Interfaz(ttk.Frame):
 
         os.system('assembly_bilinear_interpolation/./inter')
 
+        print("Se ha terminado correctamente la ejecucion de assembly")
+
+        
+
+    
+    def convert_txt_to_array(self):
+
+        f = open("assembly_bilinear_interpolation/result.img", "r")
+
+        #print()
+
+        array = f.read()
+
+
+        array = array.split(" ")
+
+        array_out = []
+        
+        for i in range(len(array)-1):
+            
+
+            array_out.append(int(array[i]))
+
+
+        f.close()
+        
+        #print(array_out)
+
+        self.arrayAssembly = np.array(array_out)
+
+        pass
+
 
 
     def fun_ejecutar_interpolacion(self):
 
-        self.generate_img_file()
+        #self.generate_img_file()
 
         n = len(self.arrayImgSelect[0])
 
@@ -350,20 +384,46 @@ class Interfaz(ttk.Frame):
 
             imgOut = "result.jpg"
 
+            self.generate_img_file()
+
+            self.convert_txt_to_array()
+            
+
             #arrayImgOut = convert_img_txt(self.arrayImgSrc)
 
 
             #   Este es el que sirve con algoritmo de python
-            arrayImgOut = bilinear_interpolation(self.arrayImgSelect)
+            arrayImgOut_python = bilinear_interpolation(self.arrayImgSelect)
 
-            
             #arrayImgOut = execute(self.arrayAssembly,n)
 
             #arrayImgOut = execute(np.array([10,20,30,40]),30)
 
-            #arrayImgOut = self.convert_img_array_to_matrix(arrayImgOut,30)
 
-            self.imgOutDimensions = len(arrayImgOut)
+
+            arrayImgOut = self.convert_img_array_to_matrix(self.arrayAssembly,16)
+
+
+
+            print("asembly result:")
+            print(arrayImgOut)
+            print("python result:")
+            print(arrayImgOut_python)
+
+            print("len assembly: ", len(arrayImgOut))
+            print("len python: ", len(arrayImgOut_python))
+
+            for e in range(13):
+
+                print("assembly:")
+                print(arrayImgOut[e])
+                print("pyton:")
+                print(arrayImgOut_python[e])
+                print("----------------")
+
+            #arrayImgOut = self.convert_img_array_to_matrix(arrayImgOut,289)
+
+            self.imgOutDimensions = len(arrayImgOut[0])
 
             print("Size out img: ", self.imgOutDimensions, "x", self.imgOutDimensions)
 
