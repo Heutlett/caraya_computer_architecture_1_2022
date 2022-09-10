@@ -36,12 +36,12 @@
 ; %assign LAST_INDEX_OUT          12
 
 ; ; Imagen 6x6
-%assign FILE_SIZE               143
-%assign MATRIX_SRC_SIZE         36
-%assign MATRIX_OUT_SIZE         256
-%assign ROW_SIZE_SRC            6
-%assign ROW_SIZE_OUT            16
-%assign LAST_INDEX_OUT          15
+; %assign FILE_SIZE               143
+; %assign MATRIX_SRC_SIZE         36
+; %assign MATRIX_OUT_SIZE         256
+; %assign ROW_SIZE_SRC            6
+; %assign ROW_SIZE_OUT            16
+; %assign LAST_INDEX_OUT          15
 
 
 
@@ -64,15 +64,16 @@
 
 
 ; Imagen 97x97
-; %assign FILE_SIZE               37635 
-; %assign MATRIX_SRC_SIZE         9409
-; %assign MATRIX_OUT_SIZE         83521
-; %assign ROW_SIZE_SRC            97
-; %assign ROW_SIZE_OUT            289
-; %assign LAST_INDEX_OUT          288
+%assign FILE_SIZE               37635 
+%assign MATRIX_SRC_SIZE         9409
+%assign MATRIX_OUT_SIZE         83521
+%assign ROW_SIZE_SRC            97
+%assign ROW_SIZE_OUT            289
+%assign LAST_INDEX_OUT          288
 
 
 %assign MASK            0xff
 %assign MASK2            0xfff
+%assign MASK3            0x1ffff
 %assign ASCII_SPACE     -16
 %assign ASCII_END       -48

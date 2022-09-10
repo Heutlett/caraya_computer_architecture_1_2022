@@ -393,34 +393,34 @@ class Interfaz(ttk.Frame):
 
 
             #   Este es el que sirve con algoritmo de python
-            arrayImgOut_python = bilinear_interpolation(self.arrayImgSelect)
+            #arrayImgOut_python = bilinear_interpolation(self.arrayImgSelect)
 
             #arrayImgOut = execute(self.arrayAssembly,n)
 
             #arrayImgOut = execute(np.array([10,20,30,40]),30)
 
-            row_out_size = 16
+            #row_out_size = 16
 
 
-            arrayImgOut = self.convert_img_array_to_matrix(self.arrayAssembly,row_out_size)
+            arrayImgOut = self.convert_img_array_to_matrix(self.arrayAssembly,289)
 
 
 
-            print("asembly result:")
-            print(arrayImgOut)
-            print("python result:")
-            print(arrayImgOut_python)
+            # print("asembly result:")
+            # print(arrayImgOut)
+            # print("python result:")
+            # print(arrayImgOut_python)
 
-            print("len assembly: ", len(arrayImgOut))
-            print("len python: ", len(arrayImgOut_python))
+            # print("len assembly: ", len(arrayImgOut))
+            # print("len python: ", len(arrayImgOut_python))
 
-            for e in range(row_out_size):
+            # for e in range(row_out_size):
 
-                print("assembly:")
-                print(arrayImgOut[e])
-                print("pyton:")
-                print(arrayImgOut_python[e])
-                print("----------------")
+            #     print("assembly:")
+            #     print(arrayImgOut[e])
+            #     print("pyton:")
+            #     print(arrayImgOut_python[e])
+            #     print("----------------")
 
             #arrayImgOut = self.convert_img_array_to_matrix(arrayImgOut,289)
 

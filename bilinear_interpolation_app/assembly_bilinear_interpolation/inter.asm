@@ -81,8 +81,8 @@ section .bss
         digitSpace      resb    100     ; Variables usadas para leer numeros enteros
         digitSpacePos   resb    8
 
-        c1              resb    8       ; Variable para guardar el indice del valor conocido 1
-        c2              resb    8       ; Variable para guardar el indice del valor conocido 2
+        c1              resb    32       ; Variable para guardar el indice del valor conocido 1
+        c2              resb    32       ; Variable para guardar el indice del valor conocido 2
         vc1             resb    8       ; Variable para guardar el contenido del valor conocido 1
         vc2             resb    8       ; Variable para guardar el contenido del valor conocido 2
 
@@ -148,10 +148,10 @@ _start:
 ;       Calcula los valores horizontales desconocidos
 _bilinear_interpolation:
 
-        ;       Imprime la matriz_out con los valores conocidos
-        mov rax, msg4
-        call print_string
-        print_matrix_out
+        ; ;       Imprime la matriz_out con los valores conocidos
+        ; mov rax, msg4
+        ; call print_string
+        ; print_matrix_out
 
         mov rbx, matrix_out     ; Puntero a matrix_out
 
@@ -280,8 +280,8 @@ pausa:
 ;       Calcula los valores horizontales desconocidos
 _bilinear_interpolation_horizontal_calc:
 
-        print_matrix_out                                                                ; DEBUG
-        print_console new_line,1
+        ; print_matrix_out                                                                ; DEBUG
+        ; print_console new_line,1
 
         mov rbx, matrix_out     ; Puntero a matrix_out
 
@@ -449,11 +449,11 @@ _create_result_file_loop:
 
 _end:
 
-        ; ; Imprime en consola la matriz resultante
-        mov rax, msg5
-        call print_string
+        ; ; ; Imprime en consola la matriz resultante
+        ; mov rax, msg5
+        ; call print_string
         
-        print_matrix_out
+        ; print_matrix_out
         
         ; Cierra el archivo de resultados
         mov rax, SYS_CLOSE
