@@ -286,7 +286,7 @@ class Interfaz(ttk.Frame):
 
     def generate_img_file(self):
 
-        file = open("assembly_bilinear_interpolation/img_src.img","w") 
+        file = open("img_src.img","w") 
  
         for r in range(len(self.arrayImgSelect)):
 
@@ -335,7 +335,7 @@ class Interfaz(ttk.Frame):
 
     def execute_assembly_bilinear_interpolation(self):
 
-        os.system('assembly_bilinear_interpolation/./inter')
+        os.system('./inter')
 
         print("Se ha terminado correctamente la ejecucion de assembly")
 
@@ -344,12 +344,9 @@ class Interfaz(ttk.Frame):
     
     def convert_txt_to_array(self):
 
-        f = open("assembly_bilinear_interpolation/result.img", "r")
-
-        #print()
+        f = open("result.img", "r")
 
         array = f.read()
-
 
         array = array.split(" ")
 
@@ -357,13 +354,10 @@ class Interfaz(ttk.Frame):
         
         for i in range(len(array)-1):
             
-
             array_out.append(int(array[i]))
-
 
         f.close()
         
-        #print(array_out)
 
         self.arrayAssembly = np.array(array_out)
 
@@ -389,40 +383,8 @@ class Interfaz(ttk.Frame):
             self.convert_txt_to_array()
             
 
-            #arrayImgOut = convert_img_txt(self.arrayImgSrc)
-
-
-            #   Este es el que sirve con algoritmo de python
-            #arrayImgOut_python = bilinear_interpolation(self.arrayImgSelect)
-
-            #arrayImgOut = execute(self.arrayAssembly,n)
-
-            #arrayImgOut = execute(np.array([10,20,30,40]),30)
-
-            #row_out_size = 16
-
-
             arrayImgOut = self.convert_img_array_to_matrix(self.arrayAssembly,289)
 
-
-
-            # print("asembly result:")
-            # print(arrayImgOut)
-            # print("python result:")
-            # print(arrayImgOut_python)
-
-            # print("len assembly: ", len(arrayImgOut))
-            # print("len python: ", len(arrayImgOut_python))
-
-            # for e in range(row_out_size):
-
-            #     print("assembly:")
-            #     print(arrayImgOut[e])
-            #     print("pyton:")
-            #     print(arrayImgOut_python[e])
-            #     print("----------------")
-
-            #arrayImgOut = self.convert_img_array_to_matrix(arrayImgOut,289)
 
             self.imgOutDimensions = len(arrayImgOut[0])
 
@@ -454,4 +416,3 @@ class Interfaz(ttk.Frame):
 if __name__ == "__main__":
     interfaz = Interfaz()
 
-    # create_main_window()
