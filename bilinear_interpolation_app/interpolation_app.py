@@ -399,9 +399,10 @@ class Interfaz(ttk.Frame):
 
             #arrayImgOut = execute(np.array([10,20,30,40]),30)
 
+            row_out_size = 16
 
 
-            arrayImgOut = self.convert_img_array_to_matrix(self.arrayAssembly,16)
+            arrayImgOut = self.convert_img_array_to_matrix(self.arrayAssembly,row_out_size)
 
 
 
@@ -413,7 +414,7 @@ class Interfaz(ttk.Frame):
             print("len assembly: ", len(arrayImgOut))
             print("len python: ", len(arrayImgOut_python))
 
-            for e in range(13):
+            for e in range(row_out_size):
 
                 print("assembly:")
                 print(arrayImgOut[e])
