@@ -23,10 +23,10 @@ SYS_EXIT    equ 60
 
 section .data
         ;filename       db  "imagen2x2.txt",0
-        filename       db  "imagen3x3.txt",0
+        ;filename       db  "imagen3x3.txt",0
         ;filename       db  "imagen4x4.txt",0
         ;filename       db  "imagen97x97.txt",0
-        ;filename       db  "imagen30x30.txt",0
+        filename       db  "imagen30x30.txt",0
 
         msgDIV          db  "------------------------------------------------------------------------",0
         msg1            db  "---------------------      Procesando archivo      ---------------------",10,10,"Contenido del archivo:",0
@@ -56,7 +56,7 @@ section .data
         matrix_out       TIMES MATRIX_OUT_SIZE dd 0      ; Arreglo de salida
         
 
-        matrix_src       TIMES MATRIX_SRC_SIZE db 0    ;     ; Arreglo de elementos de la imagen
+        ;matrix_src       TIMES MATRIX_SRC_SIZE db 0    ;     ; Arreglo de elementos de la imagen
 
         
 
@@ -68,13 +68,13 @@ section .bss
         digitSpace      resb    100     ; Variables usadas para leer numeros enteros
         digitSpacePos   resb    8
 
-        c1              resb    8       ; Variable para guardar el indice del valor conocido 1
-        c2              resb    8       ; Variable para guardar el indice del valor conocido 2
-        vc1             resb    8       ; Variable para guardar el contenido del valor conocido 1
-        vc2             resb    8       ; Variable para guardar el contenido del valor conocido 2
+        c1              resb    100       ; Variable para guardar el indice del valor conocido 1
+        c2              resb    100       ; Variable para guardar el indice del valor conocido 2
+        vc1             resb    100       ; Variable para guardar el contenido del valor conocido 1
+        vc2             resb    100       ; Variable para guardar el contenido del valor conocido 2
 
-        vertical_known_counter_c1 resb 8
-        vertical_known_counter_c2 resb 8
+        vertical_known_counter_c1 resb 10000
+        vertical_known_counter_c2 resb 10000
 
         ; matrix_src       resb    MATRIX_SRC_SIZE     ; Arreglo de elementos de la imagen
 

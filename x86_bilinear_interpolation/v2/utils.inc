@@ -197,7 +197,7 @@
         ; printRAX_push_out
         ; print_console new_line,1
         ; print_console new_line,1
-        pop rax
+        ; pop rax
 
         mov [rcx], r15w                 ; matrix_out[index_out] = r15w
                                         ; OJO: se usa r15w porque solo se ocupa 1byte
@@ -380,7 +380,7 @@ _continue_space:
         mov r11, 0              ; Resetea el numero actual
 
         cmp rcx, ASCII_END      ; Si encuentra el fin
-        je _init_matrix
+        je _bilinear_interpolation
 
         jmp _convert_ascii_dec_loop
 
@@ -414,116 +414,116 @@ _increase_row:
         jmp _continue_space
 
 
-;       _________________________________________________________________________________________
-;       Inicializa la matriz colocando los valores conocidos y en -1 los valores no conocidos
-_init_matrix:
+; ;       _________________________________________________________________________________________
+; ;       Inicializa la matriz colocando los valores conocidos y en -1 los valores no conocidos
+; _init_matrix:
 
-        ; ; Se imprime el contenido del matrix_src
-        ; print_console msg2, 31
-        ; print_console new_line,1
-        ; print_console new_line,1
+;         ; ; Se imprime el contenido del matrix_src
+;         ; print_console msg2, 31
+;         ; print_console new_line,1
+;         ; print_console new_line,1
 
-        mov rax, matrix_src
-        mov rbx, MATRIX_SRC_SIZE
-        mov rcx, ROW_SIZE_SRC
-        ;call print_matrix
+;         mov rax, matrix_src
+;         mov rbx, MATRIX_SRC_SIZE
+;         mov rcx, ROW_SIZE_SRC
+;         ;call print_matrix
 
-        mov rax, msgDIV
-        call print_string
+;         mov rax, msgDIV
+;         call print_string
 
-        mov rax, msg3
-        call print_string
+;         mov rax, msg3
+;         call print_string
 
-        mov rbx, matrix_src     ; Puntero matrix_src
-        mov rcx, matrix_out     ; Puntero matrix_out
-        mov r8, 0               ; index_src
-        mov r9, 0               ; index_out = c      
-        mov r11, 0              ; col_out
-        mov r12, 0              ; row_out
+;         mov rbx, matrix_src     ; Puntero matrix_src
+;         mov rcx, matrix_out     ; Puntero matrix_out
+;         mov r8, 0               ; index_src
+;         mov r9, 0               ; index_out = c      
+;         mov r11, 0              ; col_out
+;         mov r12, 0              ; row_out
 
-;       _________________________________________________________________________________________
-;                             Se itera sobre la matriz de salida matrix_out
-_init_matrix_loop:
+; ;       _________________________________________________________________________________________
+; ;                             Se itera sobre la matriz de salida matrix_out
+; _init_matrix_loop:
 
-        cmp r9, MATRIX_OUT_SIZE         ; IF (index_out == MATRIX_OUT_SIZE)
-        je      _init_matrix_end        ; se termina la inicializacion de la matriz de salida
+;         cmp r9, MATRIX_OUT_SIZE         ; IF (index_out == MATRIX_OUT_SIZE)
+;         je      _init_matrix_end        ; se termina la inicializacion de la matriz de salida
 
 
-        ; Calcula el mod de las filas y columnas y lo suma
-        push rax
-        push rbx
-        push rdx
+;         ; Calcula el mod de las filas y columnas y lo suma
+;         push rax
+;         push rbx
+;         push rdx
 
-        mov rax, r11
-        mov rbx, 3
-        modulo          ; col_out % 3
-        mov r13,rax     
+;         mov rax, r11
+;         mov rbx, 3
+;         modulo          ; col_out % 3
+;         mov r13,rax     
 
-        mov rax, r12
-        mov rbx, 3
+;         mov rax, r12
+;         mov rbx, 3
 
-        modulo          ; row_out % 3
-        add r13, rax    ; r13 = (col_out % 3) + (row_out % 3)
+;         modulo          ; row_out % 3
+;         add r13, rax    ; r13 = (col_out % 3) + (row_out % 3)
 
-        pop rdx
-        pop rbx
-        pop rax
+;         pop rdx
+;         pop rbx
+;         pop rax
         
-        cmp r13, 0              ; IF (col_out % 3 == 0 and row_out % 3 == 0)
-        je      _known_value    ; Agrega un valor conocido a matrix_out
+;         cmp r13, 0              ; IF (col_out % 3 == 0 and row_out % 3 == 0)
+;         je      _known_value    ; Agrega un valor conocido a matrix_out
 
-_continue_columns:
+; _continue_columns:
 
-        cmp r11, LAST_INDEX_OUT ; IF (col_out == LAST_INDEX_OUT)
-        je      _new_row_init        ; Se desplaza a la siguiente fila
+;         cmp r11, LAST_INDEX_OUT ; IF (col_out == LAST_INDEX_OUT)
+;         je      _new_row_init        ; Se desplaza a la siguiente fila
 
-_continue_new_row_init_init:
+; _continue_new_row_init_init:
 
-        inc r11         ; col_out = col_out + 1
-        inc r9          ; index_out = index_out + 1
+;         inc r11         ; col_out = col_out + 1
+;         inc r9          ; index_out = index_out + 1
 
-        jmp _init_matrix_loop
+;         jmp _init_matrix_loop
 
-_new_row_init:
+; _new_row_init:
 
-        mov r11, -1     ; col_out = -1
-        inc r12         ; row_out = row_out + 1
+;         mov r11, -1     ; col_out = -1
+;         inc r12         ; row_out = row_out + 1
 
-        jmp _continue_new_row_init_init
+;         jmp _continue_new_row_init_init
 
-;       _________________________________________________________________________________________
-;       Encuentra un index_out al que le corresponde un valor conocido:  
-;               matrix_out[index_out] = matrix_src[index_src]
-_known_value:
+; ;       _________________________________________________________________________________________
+; ;       Encuentra un index_out al que le corresponde un valor conocido:  
+; ;               matrix_out[index_out] = matrix_src[index_src]
+; _known_value:
 
-        push rbx        
-        push rcx        
-        push rax
-        push rdx
+;         push rbx        
+;         push rcx        
+;         push rax
+;         push rdx
 
-        mov rdx, r8     ; rdx = index_src
-        shl rdx, 2      ; Alinea el index_src
+;         mov rdx, r8     ; rdx = index_src
+;         shl rdx, 2      ; Alinea el index_src
 
-        add rbx, rdx    ; Desplaza el puntero matrix_src a la posicion index_src
+;         add rbx, rdx    ; Desplaza el puntero matrix_src a la posicion index_src
 
-        mov rdx, r9     ; rdx = index_out
-        shl rdx, 2      ; Alinea el index_out 
+;         mov rdx, r9     ; rdx = index_out
+;         shl rdx, 2      ; Alinea el index_out 
 
-        add rcx, rdx    ; Desplaza el puntero matrix_out a la posicion index_out
+;         add rcx, rdx    ; Desplaza el puntero matrix_out a la posicion index_out
         
 
-        mov eax, [rbx]  ; rax = matrix_src[index_src] 
-        mov [rcx], eax  ; matrix_out[index_out] = rax
+;         mov eax, [rbx]  ; rax = matrix_src[index_src] 
+;         mov [rcx], eax  ; matrix_out[index_out] = rax
 
-        pop rdx
-        pop rax
-        pop rcx
-        pop rbx
+;         pop rdx
+;         pop rax
+;         pop rcx
+;         pop rbx
         
-        inc r8          ; index_src = index_src + 1
+;         inc r8          ; index_src = index_src + 1
 
-        jmp _continue_columns
+;         jmp _continue_columns
 
-_init_matrix_end:
+; _init_matrix_end:
 
-        ret
+;         ret

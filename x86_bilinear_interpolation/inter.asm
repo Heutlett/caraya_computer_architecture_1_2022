@@ -24,9 +24,11 @@ SYS_EXIT    equ 60
 section .data
         ;filename       db  "imagen2x2.txt",0
         ;filename       db  "imagen3x3.txt",0
-        filename       db  "imagen4x4.txt",0
-        ;filename       db  "imagen97x97.txt",0
+        ;filename       db  "imagen4x4.txt",0
+        ;filename       db  "imagen10x10.txt",0
         ;filename       db  "imagen30x30.txt",0
+        filename       db  "imagen97x97.txt",0
+        
 
         msgDIV          db  "------------------------------------------------------------------------",0
         msg1            db  "---------------------      Procesando archivo      ---------------------",10,10,"Contenido del archivo:",0
@@ -120,7 +122,7 @@ _start:
         call print_string
 
         mov rax, text
-        call print_string
+        ;call print_string
 
         call create_initial_matrix_out  ; Ejecuta la rutina que crea la matriz inicial
                                         ; con los valores conocidos colocados
@@ -135,7 +137,7 @@ _bilinear_interpolation:
         ;       Imprime la matriz_out con los valores conocidos
         mov rax, msg4
         call print_string
-        print_matrix_out
+        ;print_matrix_out
 
         mov rbx, matrix_out     ; Puntero a matrix_out
 
@@ -166,7 +168,7 @@ _bilinear_interpolation_vertical_calc:
         ;print_calc_debug                                                                ; DEBUG
 ;       ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
 
-_continue_put_new_value:
+
 
 ;       ---------------------- vertical -------------------
         cmp r13, 0      ; IF (col_out % 3 == 0)         
@@ -231,7 +233,7 @@ _put_new_value:
         ;print_console new_line,1
 ;       ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
 
-        jmp _continue_put_new_value
+        jmp _continue_put_new_vertical_value
 
 ;       _________________________________________________________________________________________
 ;                       Se inicia el calculo de los valores horizontales
@@ -371,7 +373,7 @@ _end:
         mov rax, msg5
         call print_string
         
-        print_matrix_out
+        ;print_matrix_out
 
         ; Termina el programa
 

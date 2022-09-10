@@ -197,7 +197,7 @@
         ; printRAX_push_out
         ; print_console new_line,1
         ; print_console new_line,1
-        pop rax
+        ; pop rax
 
         mov [rcx], r15w                 ; matrix_out[index_out] = r15w
                                         ; OJO: se usa r15w porque solo se ocupa 1byte
@@ -373,7 +373,7 @@ _init_matrix:
         mov rax, matrix_src
         mov rbx, MATRIX_SRC_SIZE
         mov rcx, ROW_SIZE_SRC
-        call print_matrix
+        ;call print_matrix
 
         mov rax, msgDIV
         call print_string
