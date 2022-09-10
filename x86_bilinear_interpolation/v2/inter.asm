@@ -22,8 +22,8 @@ O_RDONLY    equ 0
 SYS_EXIT    equ 60
 
 section .data
-        filename       db  "imagen2x2.txt",0
-        ;filename       db  "imagen3x3.txt",0
+        ;filename       db  "imagen2x2.txt",0
+        filename       db  "imagen3x3.txt",0
         ;filename       db  "imagen4x4.txt",0
         ;filename       db  "imagen97x97.txt",0
         ;filename       db  "imagen30x30.txt",0

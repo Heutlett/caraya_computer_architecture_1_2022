@@ -312,6 +312,7 @@ _convert_ascii_dec:
         mov r9, 100             ; Multiplicador
         mov r11, 0              ; Num
         mov r14, 0              ; Contador matrix_out
+        mov r15, 0              ; col_out
 
 _convert_ascii_dec_loop:
 
@@ -350,24 +351,29 @@ _convert_ascii_dec_loop:
 
 _space: 
 
+        mov [r12], r11          ; Guarda en la posicion r12 del matrix_out el valor de r11
 
-        cmp r14, LAST_INDEX_OUT
+        pausa:
+
+
+        cmp r15, LAST_INDEX_OUT ; IF (col_out == last_index)
         je _increase_row
 
         add r14, 3
+        add r15, 3
+
+        push rax
+        
+        mov rax, r14    ; rax = index
+        shl rax, 2      ; Alinea
+        mov r12, 0
+        mov r12, matrix_out
+        add r12, rax    ; puntero + index
+
+        pop rax
 
 
 _continue_space:        
-
-        mov [r12], r11          ; Guarda en la posicion r12 del matrix_out el valor de r11
-        
-        push rax
-        
-        mov rax, r14
-        shl rax, 2
-        add r12, rax
-
-        pop rax
 
 
         mov r9, 100             ; Resetea el multiplicador
@@ -387,15 +393,23 @@ _increase_row:
         mov rax, ROW_SIZE_OUT   
         mov rbx, 2
         mul rbx 
-        add rax, r14
+        add rax, r14    ;r14 = r14 + 1 + row_size_out*2
         add rax, 1
-        
+
+
+        mov r14, rax
+        mov rax, r14
+
         shl rax, 2
 
-        add r12, rax
+        mov r12, 0
+        add r12, rax    ; puntero + r14
+        add r12, matrix_out
 
         pop rbx
         pop rax
+
+        mov r15, 0      ; col_out = 0
 
         jmp _continue_space
 
