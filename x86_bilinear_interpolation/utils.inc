@@ -474,3 +474,136 @@ _known_value:
 _init_matrix_end:
 
         ret
+
+
+
+;       _________________________________________________________________________________________
+;       Convierte el numero decimal de rax a ascii y lo almacena en la variable ascii_num
+;       ademas guarda en la variable size_ascii_num el tamano del numero
+;       input:  rax                     = int
+;       output: [size_ascii_num]        = size
+convert_dec_to_ascii:
+
+        push_registers
+
+        mov rbx, 0
+
+        mov [ascii_num], rbx
+
+        cmp rax, 10
+        jl  _less_10
+
+        cmp rax, 100
+        jl  _less_100
+
+        cmp rax, 199
+        jg  _bigger_199
+
+        cmp rax, 99
+        jg  _bigger_99
+
+
+
+_less_10:
+
+        add rax, 48
+        mov [ascii_num], rax
+        mov rax, 1
+        mov [size_ascii_num], rax
+
+        pop_registers
+
+        ret
+
+
+
+_less_100:
+
+        mov rbx, rax
+        mov rcx, 10
+        mov rdx, 0
+
+        div rcx     ; rax/10
+
+        add rax, 48
+        mov [ascii_num], rax
+
+        mov r10, ascii_num
+        add r10, 1
+
+        add rdx, 48
+
+        mov [r10], rdx
+
+        mov rax, 2
+        mov [size_ascii_num], rax
+
+        pop_registers
+
+        ret
+
+
+_bigger_199:
+
+        mov rbx, 50
+        mov [ascii_num], rbx
+
+        sub rax, 200
+
+        mov r10, ascii_num
+        add r10, 1
+
+        mov rbx, rax
+        mov rcx, 10
+        mov rdx, 0
+
+        div rcx     ; rax/10
+
+        add rax, 48
+        mov [r10], rax
+
+        inc r10
+
+        add rdx, 48
+
+        mov [r10], rdx
+
+        mov rax, 3
+        mov [size_ascii_num], rax
+
+        pop_registers   
+
+        ret
+
+
+_bigger_99:
+
+        mov rbx, 49
+        mov [ascii_num], rbx
+
+        sub rax, 100
+
+        mov r10, ascii_num
+        add r10, 1
+
+        mov rbx, rax
+        mov rcx, 10
+        mov rdx, 0
+
+        div rcx     ; rax/10
+
+        add rax, 48
+        mov [r10], rax
+
+        inc r10
+
+        add rdx, 48
+
+        mov [r10], rdx
+
+        mov rax, 3
+        mov [size_ascii_num], rax
+
+        pop_registers
+
+        ret

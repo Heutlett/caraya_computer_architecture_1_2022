@@ -21,13 +21,22 @@ O_RDONLY    equ 0
 
 SYS_EXIT    equ 60
 
+O_WRONLY    equ 1
+
+O_CREAT     equ 64
+
+
 section .data
-        ;filename       db  "imagen2x2.txt",0
-        ;filename       db  "imagen3x3.txt",0
-        ;filename       db  "imagen4x4.txt",0
-        ;filename       db  "imagen10x10.txt",0
-        ;filename       db  "imagen30x30.txt",0
-        filename       db  "imagen97x97.txt",0
+        ;filename_src       db  "imagen2x2.txt",0
+        ;filename_src       db  "imagen3x3.txt",0
+        ;filename_src       db  "imagen4x4.txt",0
+        ;filename_src       db  "imagen10x10.txt",0
+        ;filename_src       db  "imagen30x30.txt",0
+        filename_src       db  "imagen97x97.txt",0
+
+        filename_out        db  "result.img",0
+
+
         
 
         msgDIV          db  "------------------------------------------------------------------------",0
@@ -54,6 +63,7 @@ section .data
 
         new_line        db  "",  10             ; Valor de una nueva linea para imprimir
         tab             db  "",9                ; Valor de un tab para imprimir
+        space           db  "",32                ; Valor de un tab para imprimir
         
         matrix_out       TIMES MATRIX_OUT_SIZE dd 0      ; Arreglo de salida
         
@@ -78,6 +88,9 @@ section .bss
         vertical_known_counter_c1 resb 8
         vertical_known_counter_c2 resb 8
 
+        ascii_num       resd    3   
+        size_ascii_num  resb    8 
+
         ; matrix_src       resb    MATRIX_SRC_SIZE     ; Arreglo de elementos de la imagen
 
         ; matrix_out       resd    MATRIX_OUT_SIZE      ; Arreglo de salida
@@ -93,7 +106,7 @@ _start:
         ; [SYSCALL: OPEN]   |   Se abre el archivo
 
         mov rax, SYS_OPEN    ; %rax          : 0x02                  |   Abre el archivo
-        mov rdi, filename    ; arg0 (%rdi)   : const char *filename  |   Nombre del archivo
+        mov rdi, filename_src    ; arg0 (%rdi)   : const char *filename_src  |   Nombre del archivo
         mov rsi, O_RDONLY    ; arg2 (%rdx)   : umode_t mode          |   Modo lectura
         syscall
 
@@ -274,7 +287,7 @@ _bilinear_interpolation_horizontal_calc:
 _bilinear_interpolation_calc_loop:
 
         cmp r10, MATRIX_OUT_SIZE        ; IF (index_out == MATRIX_OUT_SIZE)
-        je      _end        ; Finaliza el calculo de los valores horizontales    
+        je      _create_result_file     ; Finaliza el calculo de los valores horizontales    
 
         ; Calcula el mod de las filas y columnas
         ; Guarda en r13 = col_out%3, r14 = row_out%3, r15 = col_out%3 + row_out%3
@@ -368,12 +381,76 @@ _put_new_value_horizontal:
 
         jmp _continue_put_new_horizontal_value
 
-_end:
+_create_result_file:
 
-        mov rax, msg5
-        call print_string
+        ; Imprime en consola la matriz resultante
+        ; mov rax, msg5
+        ; call print_string
         
-        ;print_matrix_out
+        ; print_matrix_out
+
+        ; Elimina el archivo de resultados
+        mov eax, 10             
+        mov ebx, filename_out       
+        int 80h                 
+
+        ; Crea el archivo de resultados
+        mov rax, SYS_OPEN
+        mov rdi, filename_out
+        mov rsi, O_WRONLY+O_CREAT
+        mov rdx, 0644o
+        syscall
+
+        mov rdi, rax            ; fd
+
+        mov r8, 0               ; contador
+
+        mov r10, matrix_out
+
+
+_create_result_file_loop:
+
+        cmp r8, MATRIX_OUT_SIZE
+        je _end
+
+        mov r9, r8
+        shl r9, 2
+
+        add r9, matrix_out
+
+        mov rax, [r9]
+
+        and rax, MASK
+
+        call convert_dec_to_ascii
+
+        mov rax, SYS_WRITE
+        mov rsi, ascii_num
+        mov rdx, [size_ascii_num]
+
+        syscall
+
+        mov rax, SYS_WRITE
+        mov rsi, space
+        mov rdx, 1
+
+        syscall
+
+        inc r8
+
+        jmp _create_result_file_loop
+
+_end:
+        ; Cierra el archivo de resultados
+        mov rax, SYS_CLOSE
+        pop rdi
+        syscall
+
+        ; ; Imprime en consola la matriz resultante
+        ; mov rax, msg5
+        ; call print_string
+        
+        ; print_matrix_out
 
         ; Termina el programa
 
