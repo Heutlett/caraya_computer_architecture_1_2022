@@ -285,8 +285,6 @@ def interpolation_optimized(I, n_src):
     last_index = row_size_out-1
     
     print("LAST_INDEX_OUT: ", last_index)
-
-    #return
     
     print()
 
@@ -294,25 +292,6 @@ def interpolation_optimized(I, n_src):
     I_out2 = horizontal_optimized_calc(I_out2, row_size_out)
         
     return I_out2
-
-def execute(I,n):
-
-    n_src = n                           # Esto se lo voy a pasar al compilador yo mismo como argumento de linea de comandos
-
-    I_out2 = generate_initial_Iout(I,n_src)
-
-    row_size_src = n_src-1
-    row_size_out = row_size_src*3+1
-
-    I_out2 = interpolation_optimized(I_out2,n_src)
-
-    print("\nI_out:")
-    printerArray(I_out2,row_size_out)
-
-    return I_out2
-
-
-
 
 
     #   Calcula el valor de pixel de interpolacion
@@ -373,5 +352,28 @@ def execute(I,n):
 
 #I_out = bilinear_interpolation(I)
 
+
+
+I_2 = np.array([10,20,30,40])
+n_src = 2                           # Esto se lo voy a pasar al compilador yo mismo como argumento de linea de comandos
+
+#I_2 = np.array([10,20,30,40,30,40,50,60,50])
+#n_src = 3
+
+#I_2 = np.array([10,20,30,40,30,40,50,60,50,60,70,80,70,80,90,0])
+#n_src = 4
+
+I_out2 = generate_initial_Iout(I_2,n_src)
+
+row_size_src = n_src-1
+row_size_out = row_size_src*3+1
+
+
+I_out2 = interpolation_optimized(I_out2,n_src)
+
+print("\nI2:")
+printerArray(I_2,n_src)
+print("\nI_out:")
+printerArray(I_out2,row_size_out)
 
 #test_algorithm()

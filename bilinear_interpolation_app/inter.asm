@@ -21,19 +21,37 @@ O_RDONLY    equ 0
 
 SYS_EXIT    equ 60
 
+O_WRONLY    equ 1
+
+O_CREAT     equ 64
+
+
 section .data
-        ;filename       db  "imagen2x2.txt",0
-        ;filename       db  "imagen3x3.txt",0
-        ;filename       db  "imagen4x4.txt",0
-        ;filename       db  "imagen97x97.txt",0
-        filename       db  "imagen30x30.txt",0
+        ;filename_src       db  "imagen2x2.txt",0
+        ;filename_src       db  "imagen3x3.txt",0
+        ;filename_src       db  "imagen4x4.txt",0
+        ;filename_src       db  "imagen10x10.txt",0
+        ;filename_src       db  "imagen30x30.txt",0
+        ;filename_src       db  "imagen97x97.txt",0
+
+        filename_src       db  "img_src.img",0
+        filename_out       db  "result.img",0
+        
 
         msgDIV          db  "------------------------------------------------------------------------",0
-        msg1            db  "---------------------      Procesando archivo      ---------------------",10,10,"Contenido del archivo:",0
+        msg1            db  "---------------------  Procesando archivo en x86   ---------------------",0
         msg2            db  "Contenido de la matriz inicial:",0
         msg3            db  "--------------------   Creando matriz resultante   ---------------------",0
         msg4            db  "Valores conocidos:",0
         msg5            db  "Valores horizontales:",0
+        msg6            db  "▶ Se colocara un nuevo valor"
+        msg7            db  "▶ Se ha leido el archivo correctamente",0
+        msg8            db  "▶ Se ha creado la matriz inicial con los valores conocidos y los espacios de valores desconocidos",0
+        msg9            db  "▶ Se calcularon exitosamente los valores desconocidos verticales",0
+        msg10           db  "▶ Se calcularon exitosamente los valores desconocidos horizontales",0
+        msg11           db  "▶ Se ha calculado la matriz de interpolacion exitosamente",0
+        msg12           db  "▶ Se ha creado el archivo .img de salida correctamente",0
+        msg13           db  "▶ El programa ha finalizado exitosamente",0
         msgCol          db  "col_out: ",0
         msgRow          db  "row_out: ",0
         msgC1           db  "c1: ",0
@@ -48,15 +66,16 @@ section .data
         msgCalcNewValue db  "Calculando nuevo valor desconocido",0
         msgGuardaEnI    db  "Guarda en el indice: ",0
         msgMatrixActual db  "Matriz actual antes de calcular",0
-        msg6            db  "▶ Se colocara un nuevo valor"
+        
 
         new_line        db  "",  10             ; Valor de una nueva linea para imprimir
         tab             db  "",9                ; Valor de un tab para imprimir
+        space           db  "",32                ; Valor de un tab para imprimir
         
-        matrix_out       TIMES MATRIX_OUT_SIZE dd 0      ; Arreglo de salida
+        matrix_out       TIMES MATRIX_OUT_SIZE dd 300      ; Arreglo de salida
         
 
-        ;matrix_src       TIMES MATRIX_SRC_SIZE db 0    ;     ; Arreglo de elementos de la imagen
+        matrix_src       TIMES MATRIX_SRC_SIZE db 0    ;     ; Arreglo de elementos de la imagen
 
         
 
@@ -68,20 +87,17 @@ section .bss
         digitSpace      resb    100     ; Variables usadas para leer numeros enteros
         digitSpacePos   resb    8
 
-        c1              resb    100       ; Variable para guardar el indice del valor conocido 1
-        c2              resb    100       ; Variable para guardar el indice del valor conocido 2
-        vc1             resb    100       ; Variable para guardar el contenido del valor conocido 1
-        vc2             resb    100       ; Variable para guardar el contenido del valor conocido 2
+        c1              resb    32       ; Variable para guardar el indice del valor conocido 1
+        c2              resb    32       ; Variable para guardar el indice del valor conocido 2
+        vc1             resb    8       ; Variable para guardar el contenido del valor conocido 1
+        vc2             resb    8       ; Variable para guardar el contenido del valor conocido 2
 
-        vertical_known_counter_c1 resb 10000
-        vertical_known_counter_c2 resb 10000
+        vertical_known_counter_c1 resb 8
+        vertical_known_counter_c2 resb 8
 
-        ; matrix_src       resb    MATRIX_SRC_SIZE     ; Arreglo de elementos de la imagen
+        ascii_num       resd    3   
+        size_ascii_num  resb    8 
 
-        ; matrix_out       resd    MATRIX_OUT_SIZE      ; Arreglo de salida
-
-        
-        
 
 section .text
         global _start
@@ -91,7 +107,7 @@ _start:
         ; [SYSCALL: OPEN]   |   Se abre el archivo
 
         mov rax, SYS_OPEN    ; %rax          : 0x02                  |   Abre el archivo
-        mov rdi, filename    ; arg0 (%rdi)   : const char *filename  |   Nombre del archivo
+        mov rdi, filename_src    ; arg0 (%rdi)   : const char *filename_src  |   Nombre del archivo
         mov rsi, O_RDONLY    ; arg2 (%rdx)   : umode_t mode          |   Modo lectura
         syscall
 
@@ -119,8 +135,11 @@ _start:
         mov rax, msg1
         call print_string
 
-        mov rax, text
+        mov rax, msg7
         call print_string
+
+
+
 
         call create_initial_matrix_out  ; Ejecuta la rutina que crea la matriz inicial
                                         ; con los valores conocidos colocados
@@ -132,10 +151,14 @@ _start:
 ;       Calcula los valores horizontales desconocidos
 _bilinear_interpolation:
 
-        ;       Imprime la matriz_out con los valores conocidos
-        mov rax, msg4
+        ; ;       Imprime la matriz_out con los valores conocidos
+        ; mov rax, msg4
+        ; call print_string
+        ; print_matrix_out
+
+        mov rax, msg8
         call print_string
-        print_matrix_out
+
 
         mov rbx, matrix_out     ; Puntero a matrix_out
 
@@ -166,7 +189,7 @@ _bilinear_interpolation_vertical_calc:
         ;print_calc_debug                                                                ; DEBUG
 ;       ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
 
-_continue_put_new_value:
+
 
 ;       ---------------------- vertical -------------------
         cmp r13, 0      ; IF (col_out % 3 == 0)         
@@ -213,12 +236,10 @@ _increase_vertical_known_counters:
 
 _put_new_value:
 
-        
-
 ;       ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
-        ;print_console msg6, 31
-        ;print_console new_line,1
-        ;print_calc_debug2                                                    ; DEBUG
+        ; print_console msg6, 31
+        ; print_console new_line,1
+        ; print_calc_debug2                                                    ; DEBUG
 ;       ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
 
         ;       Inserta un nuevo valor a matrix_out
@@ -227,11 +248,11 @@ _put_new_value:
         insert_new_value_into_matrix_out
 
 ;       ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
-        ;print_matrix_out                                                                ; DEBUG
-        ;print_console new_line,1
+        ; print_matrix_out                                                                ; DEBUG
+        ; print_console new_line,1
 ;       ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
 
-        jmp _continue_put_new_value
+        jmp _continue_put_new_vertical_value
 
 ;       _________________________________________________________________________________________
 ;                       Se inicia el calculo de los valores horizontales
@@ -250,8 +271,10 @@ _put_new_vertical_value:
         ;       Almacena en rax el valor de matrix_out[r10] y en rcx el puntero
         get_value_and_pointer_matrix_out r10
 
+pausa:
+
         ; Esta condicion se debe cambiar, debe ser == -1
-        cmp rax, 0              ; IF (matrix_out[index_out] == 0)
+        cmp rax, 300              ; IF (matrix_out[index_out] == 0)
         je _put_new_value     ; Si se cumple significa que es un valor desconocido que se debe calcular
 
 
@@ -260,6 +283,10 @@ _put_new_vertical_value:
 
 ;       Calcula los valores horizontales desconocidos
 _bilinear_interpolation_horizontal_calc:
+
+        mov rax, msg9
+        call print_string
+
 
         mov rbx, matrix_out     ; Puntero a matrix_out
 
@@ -272,7 +299,7 @@ _bilinear_interpolation_horizontal_calc:
 _bilinear_interpolation_calc_loop:
 
         cmp r10, MATRIX_OUT_SIZE        ; IF (index_out == MATRIX_OUT_SIZE)
-        je      _end        ; Finaliza el calculo de los valores horizontales    
+        je      _create_result_file     ; Finaliza el calculo de los valores horizontales    
 
         ; Calcula el mod de las filas y columnas
         ; Guarda en r13 = col_out%3, r14 = row_out%3, r15 = col_out%3 + row_out%3
@@ -339,14 +366,12 @@ _put_new_horizontal_value:
         get_value_and_pointer_matrix_out r10
 
         ; Esta condicion se debe cambiar, debe ser == -1
-        cmp rax, 0              ; IF (matrix_out[index_out] == 0)
+        cmp rax, 300              ; IF (matrix_out[index_out] == 0)
         je _put_new_value_horizontal     ; Si se cumple significa que es un valor desconocido que se debe calcular
 
         jmp _continue_put_new_horizontal_value
 
 _put_new_value_horizontal:
-
-
 
 ;       ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
         ;print_console msg6, 31
@@ -366,12 +391,87 @@ _put_new_value_horizontal:
 
         jmp _continue_put_new_horizontal_value
 
+_create_result_file:
+
+        mov rax, msg10
+        call print_string 
+
+        mov rax, msg11
+        call print_string
+
+        ; Elimina el archivo de resultados
+        mov eax, 10             
+        mov ebx, filename_out       
+        int 80h                 
+
+        ; Crea el archivo de resultados
+        mov rax, SYS_OPEN
+        mov rdi, filename_out
+        mov rsi, O_WRONLY+O_CREAT
+        mov rdx, 0644o
+        syscall
+
+        mov rdi, rax            ; fd
+
+        mov r8, 0               ; contador
+
+        mov r10, matrix_out
+
+
+_create_result_file_loop:
+
+        cmp r8, MATRIX_OUT_SIZE
+        je _end
+
+        mov r9, r8
+        shl r9, 2
+
+        add r9, matrix_out
+
+        mov rax, [r9]
+
+        and rax, MASK
+
+        call convert_dec_to_ascii
+
+        mov rax, SYS_WRITE
+        mov rsi, ascii_num
+        mov rdx, [size_ascii_num]
+
+        syscall
+
+        mov rax, SYS_WRITE
+        mov rsi, space
+        mov rdx, 1
+
+        syscall
+
+        inc r8
+
+        jmp _create_result_file_loop
+
 _end:
 
-        mov rax, msg5
+
+        mov rax, msg12
         call print_string
+
+        mov rax, msg13
+        call print_string
+
+        mov rax, msgDIV
+        call print_string
+
+        ; ; ; Imprime en consola la matriz resultante
+        ; mov rax, msg5
+        ; call print_string
         
-        print_matrix_out
+        ; print_matrix_out
+        
+        ; Cierra el archivo de resultados
+        mov rax, SYS_CLOSE
+        pop rdi
+        syscall
 
         ; Termina el programa
 

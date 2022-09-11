@@ -1,14 +1,12 @@
 import tkinter as tk
 from PIL import Image
-
-from bilinear_interpolation import *
 from img_tools import *
 from matplotlib import pyplot as plt
 
 # Dibuja una matriz de pixeles en un fondo blanco y lo guarda como una imagen
 def drawImage(imgMatrix):
 
-    image = Image.open("imgs/white1500.jpg") 
+    image = Image.open("imgs/white289x289.jpg") 
 
     for r in range(len(imgMatrix)):
         for c in range(len(imgMatrix)):
@@ -18,8 +16,11 @@ def drawImage(imgMatrix):
             image.putpixel( (c, r), (color, color, color) )
 
     image.save("imgs/result.jpg")
+    image.save("result.jpg")
 
-    print("Imagen guardada correctamente")
+    print("Se ha dibujado exitosamente el resultado\n")
+    print("Se ha generado el archivo de la imagen en la ruta: /imgs/result.jpg ")
+
 
 def drawQuadrants(imgMatrix):
 
@@ -38,7 +39,7 @@ def drawQuadrants(imgMatrix):
 
     image.save("imgs/imageSrcQuadrants.jpg")
 
-    print("Imagen guardada correctamente")
+
 
 def paintQuadrant(imgMatrix,x,y,q):
 
@@ -104,7 +105,5 @@ def paintQuadrant(imgMatrix,x,y,q):
 
 
     image.save("imgs/imageSrcQuadrants.jpg")
-
-    print("Imagen guardada correctamente")
 
     

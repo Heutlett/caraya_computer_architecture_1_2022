@@ -64,7 +64,7 @@
 
         pop rax
 
-        print_matrix_out
+        ; print_matrix_out
 %endmacro
 
 ;       Print para debuggear el calculo de valores horizontales (2)

@@ -22,7 +22,7 @@
         mov rcx,rax             ; Se guarda en rcx el puntero para usarlo posteriormente
 
         mov rax, [rax]          ; rax = matrix_out[index_out]
-        and rax, MASK
+        and rax, MASK2
 
 %endmacro
 
@@ -231,11 +231,11 @@ calc_interpolation:
 
         mov r8,r11              ; r8 = indexCALC
         mov r9, [c1]
-        and r9, MASK
+        and r9, MASK3
         mov r10, [vc1]
         and r10, MASK
         mov r11, [c2]
-        and r11, MASK
+        and r11, MASK3
         mov r12, [vc2]
         and r12, MASK
 

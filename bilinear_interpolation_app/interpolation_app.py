@@ -1,6 +1,5 @@
 
-from array import array
-from cgitb import enable
+
 import tkinter as tk
 from tkinter import ttk
 from calendar import month_name
@@ -9,12 +8,9 @@ from tkinter import filedialog
 from turtle import bgcolor
 from PIL import Image, ImageTk
 import os
-from bilinear_interpolation import *
 from img_tools import *
 from drawer import *
 import os
-import time
-from optimized_final import *
 
 
 class Interfaz(ttk.Frame):
@@ -81,7 +77,7 @@ class Interfaz(ttk.Frame):
        
 
 
-        labelTitulo = tk.Label(self.root_frame, text='Bilinear Interpolation in ARM',font=("Helvetica", 35)).place(x=477, y=34)
+        labelTitulo = tk.Label(self.root_frame, text='Bilinear Interpolation in x86',font=("Helvetica", 35)).place(x=477, y=34)
         
         label_entry_img = tk.Label(self.root_frame, text='Type image name:',font=("Helvetica", 20)).place(x=80, y=158)
         entry_img = ttk.Entry(self.root_frame, textvariable=self.entry_var, font=("Helvetica", 20)).place(x=320, y=154)
@@ -281,7 +277,8 @@ class Interfaz(ttk.Frame):
         
         self.arrayImgSelect = result
 
-        print("Se ha generado la matriz que va para assembly")
+        print("Se ha generado la matriz equivalente al cuadrante: ",quad)
+        print()
 
 
     def generate_img_file(self):
@@ -293,7 +290,6 @@ class Interfaz(ttk.Frame):
             for c in range(len(self.arrayImgSelect[r])):
 
                 num = self.arrayImgSelect[r][c]
-                #self.arrayAssembly.append (num)
 
                 if (num < 10):
                     num = "00" + str(num)
@@ -307,9 +303,7 @@ class Interfaz(ttk.Frame):
         
         file.close() 
 
-        #self.arrayAssembly = np.array(self.arrayAssembly)
-
-        print("Se ha generado el archivo img que se utilizara en assembly")
+        print("Se ha generado el archivo .img que se utilizara en x86\n")
 
         self.execute_assembly_bilinear_interpolation()
 
@@ -337,7 +331,7 @@ class Interfaz(ttk.Frame):
 
         os.system('./inter')
 
-        print("Se ha terminado correctamente la ejecucion de assembly")
+        print("De vuelta a python\n")
 
         
 
@@ -371,7 +365,7 @@ class Interfaz(ttk.Frame):
 
         n = len(self.arrayImgSelect[0])
 
-        print("El tamano de la matriz es: ", str(n))
+        print("El tamano de la matriz de entrada para x86 es: ", str(n), "x", str(n), "\n")
         
         
         if(self.entry_var.get() != "" and self.loaded and self.quad_selected):
@@ -388,7 +382,9 @@ class Interfaz(ttk.Frame):
 
             self.imgOutDimensions = len(arrayImgOut[0])
 
-            print("Size out img: ", self.imgOutDimensions, "x", self.imgOutDimensions)
+            print("Tamano de la matriz de la imagen interpolada: ", self.imgOutDimensions, "x", self.imgOutDimensions, "\n")
+
+            print("Iniciando dibujo del resultado obtenido en x86\n")
 
             drawImage(arrayImgOut)
 

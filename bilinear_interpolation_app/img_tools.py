@@ -1,7 +1,6 @@
 import re
 from matplotlib.image import imread
 import numpy as np
-from bilinear_interpolation import *
 
 #   Imprime una matriz con formato
 def printer(array2d):  

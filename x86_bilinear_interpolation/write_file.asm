@@ -88,7 +88,7 @@ convert_dec_to_ascii:
 
     cmp rax, 99
     jg  _bigger_99
-
+_end
 
 
 _less_10:
